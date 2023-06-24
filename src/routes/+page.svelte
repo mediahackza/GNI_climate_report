@@ -32,6 +32,24 @@
         return ret_value;
     }
 
+    const to_all = (arr, bool) => {
+        arr.forEach(a => a.active = bool);
+        return arr;
+    }
+
+    const arr_all = (arr, bool) => {
+        let ret_val = true;
+        arr.forEach(a => {
+            if (a.active != bool) {
+                ret_val = false;
+                return false;
+            }
+
+            return true;
+        })
+        return ret_val;
+    }
+
 </script>
 <div class="title">
     countries:
@@ -43,6 +61,21 @@
                 {c.country}
         </div>
     {/each}
+
+    
+
+    {#if !arr_all(countries, true)}
+    <div class="tag inactive" on:click={() => {countries = to_all(countries, true); d = d}}>
+        show all
+    </div>
+    {/if}
+
+    {#if !arr_all(countries, false)}
+    <div class="tag inactive" on:click={() => {countries = to_all(countries, false); d = d}}>
+        clear
+    </div> 
+    {/if}
+    
 </div>
 
 <div class='title'>
@@ -54,17 +87,31 @@
                 {tag.tag}
         </div>
     {/each}
+
+    {#if !arr_all(tags, true)}
+    <div class="tag inactive" on:click={() => {tags = to_all(tags, true); d = d}}>
+    show all
+    </div>
+    {/if}
+
+    {#if !arr_all(tags, false)}
+    <div class="tag inactive" on:click={() => {tags = to_all(tags, false); d = d}}>
+        clear
+    </div> 
+    {/if}
 </div>
 
 <table>
     <thead>
         <tr>
             <th>Report</th>
-            <th>Tags</th>
+            <!-- <th>Tags</th> -->
 
-            {#each countries as c}
+            <!-- {#each countries as c}
+            {#if c.active}
                 <th>{c.country}</th>
-            {/each}
+            {/if}
+            {/each} -->
         </tr>
     </thead>
     <tbody>
@@ -72,11 +119,11 @@
 
             <tr class='{(check_country(item) && check_tags(item.tags)) ? '' : 'hidden'}'>
                 <td><a href="{item.link}" tagret="_blank">{item.report}</a></td>
-                <td>{item.tags}</td>
+                <!-- <td>{item.tags}</td> -->
 
-                {#each countries as c}
+                <!-- {#each countries as c}
                     <td>{item[`${c.country}`]}</td>
-                {/each}
+                {/each} -->
             </tr>
             
         {/each}
@@ -84,6 +131,33 @@
 </table>
 
 <style>
+
+    :global(body) {
+        font-family: 'Roboto', sans-serif;
+    }
+    table {
+        margin: 10px auto;
+        padding: 0;
+        border: 1px solid lightgray;
+        
+    }
+
+    .title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 10px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #eee;
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+
+    td {
+        border-bottom: 1px solid #eee;
+    }
     .tag {
         padding: 5px;
         margin: 5px;
@@ -95,6 +169,7 @@
     .tag_filter {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
     }
 
     .inactive {
@@ -108,5 +183,6 @@
 
     .hidden {
         background-color: gray;
+        display: none;
     }
 </style>
