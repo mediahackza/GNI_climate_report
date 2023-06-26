@@ -1,16 +1,16 @@
 <script>
 
     export let data;
-    console.log(data);
+    // console.log(data);
 
     let tags = data.tags;
     let d = data.data;
     let countries = data.countries;
 
+    
     const check_country = (item) => {
         let ret_value = false;
         countries.forEach(a => {
-            console.log(a, item[`${a.country}`]);
                 if (a.active && item[`${a.country}`] == 'yes') ret_value = true;
         })
         
@@ -18,19 +18,31 @@
     }
 
     const check_tags = (item) => {
-        let temp = item.replaceAll(" ", "");
+        let temp = item.tags.replaceAll(" ", "");
         temp = temp.split(",");
         let ret_value = false;
+        let count = 0;
         temp.forEach(t => {
             if (tags.find(tag => {
                 let find_value = tag.tag.replaceAll(" ", "");
                 return find_value == t && tag.active
-            }))
-               ret_value = true;
+            })) {
+                count++;
+                ret_value = true;
+            }
+               
         })
+
+        item.count = count;
+
+        console.log(item);
 
         return ret_value;
     }
+
+    d.forEach(a => {
+        check_tags(a);
+    })
 
     const to_all = (arr, bool) => {
         arr.forEach(a => a.active = bool);
@@ -48,6 +60,12 @@
             return true;
         })
         return ret_val;
+    }
+
+    const resort = (d) => {
+        return d.sort((a, b) => {
+            return b.count - a.count;
+        })
     }
 
 </script>
@@ -83,19 +101,19 @@
 </div>
 <div class="tag_filter" >
     {#each tags as tag}
-        <div class="tag {tag.active ? 'active': 'inactive'}" on:click={() => {tag.active = !tag.active; d = d}}>
+        <div class="tag {tag.active ? 'active': 'inactive'}" on:click={() => {tag.active = !tag.active; d = resort(d)}}>
                 {tag.tag}
         </div>
     {/each}
 
     {#if !arr_all(tags, true)}
-    <div class="tag inactive" on:click={() => {tags = to_all(tags, true); d = d}}>
+    <div class="tag inactive" on:click={() => {tags = to_all(tags, true); d = resort(d)}}>
     show all
     </div>
     {/if}
 
     {#if !arr_all(tags, false)}
-    <div class="tag inactive" on:click={() => {tags = to_all(tags, false); d = d}}>
+    <div class="tag inactive" on:click={() => {tags = to_all(tags, false); d = resort(d)}}>
         clear
     </div> 
     {/if}
@@ -117,9 +135,9 @@
     <tbody>
         {#each d as item}
 
-            <tr class='{(check_country(item) && check_tags(item.tags)) ? '' : 'hidden'}'>
+            <tr class='{(check_country(item) && check_tags(item)) ? '' : 'hidden'}'>
                 <td><a href="{item.link}" tagret="_blank">{item.report}</a></td>
-                <!-- <td>{item.tags}</td> -->
+                <td>{item.tags}</td>
 
                 <!-- {#each countries as c}
                     <td>{item[`${c.country}`]}</td>
