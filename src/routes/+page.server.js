@@ -5,6 +5,14 @@ export async function load({ }) {
     let res = await fetch(url);
     let data = await res.json();
 
+    
+    data.map(e => {
+        e.tags = e.tags.replace(" ", "");
+        e.tags = e.tags.split(",");
+        return e
+    });
+    console.log(data)
+
     // console.log(data);
     let ret = {
         data: data,
@@ -14,7 +22,7 @@ export async function load({ }) {
     ret.countries = Object.keys(data[0]);
 
     data.forEach((item) => {
-        let temp = item.tags.split(",");
+        let temp = item.tags;
 
         console.log(temp);
 
