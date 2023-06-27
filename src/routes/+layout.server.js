@@ -1,9 +1,11 @@
-export async function load({ locals }) {
+export async function load({ fetch, locals }) {
     let url = "https://datadesk.dev/api/json.php?table=160";
 
 
     let res = await fetch(url);
     let data = await res.json();
+
+    locals.data = "hello there";
 
     
     data.map(e => {
@@ -28,8 +30,6 @@ export async function load({ locals }) {
     let tags = [];
     data.forEach((item) => {
         let temp = item.tags;
-
-        // console.log(temp);
 
         temp.forEach((tag) => {
             if (!tags.includes(tag)) {
@@ -73,8 +73,6 @@ export async function load({ locals }) {
         });
         return ret;
     })
-
-    locals = ret;
 
     return ret
 }

@@ -1,14 +1,6 @@
 <script>
     export let data;
-    console.log(data);
-
-        // const check_tag = (c, tag) => {
-        //     console.log(c, tag)
-             
-        // }
-
-        const get_value = (tag, country) => {
-            console.log(tag.tag, country[tag.tag]);
+         const get_value = (tag, country) => {
             if (country[tag.tag] == null) {
                 return "unset_tag";
             }
@@ -19,6 +11,8 @@
             }
 
         }
+
+        let link = "./"
 
 </script>
 
@@ -33,7 +27,7 @@
     <tbody>
         {#each data.countries as c}
             <tr>
-                <td><a href="./{c.country}">{c.country}</a></td>
+                <td class="country_col"><a href="./{c.country}-">{c.country}</a></td>
                 {#each data.tags as tag}
                     <td class="block {(get_value(tag, c))}"></td>   
                 {/each}
@@ -45,10 +39,14 @@
 
 <style>
 
+:global(body) {
+        font-family: 'Roboto', sans-serif;
+    }
+
     table {
         width: 90%;
         margin: auto;
-        table-layout: fixed;
+        /* table-layout: fixed; */
     }
 
 .has_tag {
@@ -56,11 +54,16 @@
 }
 
 .unset_tag {
-    background-color: #F0A202
+    background-color: #eee
 }
 
 .no_tag {
     background-color: #EF6461;
+}
+
+.country_col {
+    /* width: 500px; */
+    border: 1px solid black
 }
 
 /* .block {
