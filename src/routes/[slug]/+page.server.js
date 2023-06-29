@@ -11,6 +11,35 @@ export async function load({ parent, params }) {
 
     let current_data = [];
 
+    switch (filters.country) {
+        case 'east':
+            data = data.filter(a => {
+                return a.region == 'east';    
+            });
+            break;
+        case 'west':
+            data = data.filter(a => {
+                return a.region == 'west';    
+            });
+            break;
+        case 'north':
+            data = data.filter(a => {
+                return a.region == 'north';    
+            });
+            break;
+        case 'south':
+            data = data.filter(a => {
+                return a.region == 'south';    
+            });
+            break;
+        case 'central':
+            data = data.filter(a => {
+                return a.region == 'central';    
+            });
+            break;
+        default:
+            break;
+    }
     
 
     // if (filters.country.includes('east') || filters.country.includes('west') || filters.country.includes('north') || filters.country.includes('south') || filters.country.includes('central')) {
@@ -40,6 +69,8 @@ export async function load({ parent, params }) {
 
         current_data.push(temp);
     });
+
+    
     
     // if (country != '') {
     //     current_data = current_data.filter(a => {
