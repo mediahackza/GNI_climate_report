@@ -15,6 +15,35 @@ export async function load({ fetch, params, locals}) {
     //     return b.region.localeCompare(a.region);
     // })
 
+    data = data.map(a => {
+        let temp = {
+            report: a.report,
+            link: a.link,
+            tags:new Set(a.tags.split(",").map(a => {
+                return a.trim()
+            })),
+            countries: new Set(),
+            regions: new Set()
+        }
+
+        Object.keys(a).forEach(b => {
+            if (b == 'report' || b == 'link' || b == 'tags') {
+                return;
+            } else {
+                temp[b] = a[b];
+            }
+
+            if (a[b] == 'yes') {
+                temp.countries.add(b);
+                temp.regions.add(data_2.filter(a => {
+                    return a.location == b;
+                })[0].region);
+            }
+        })
+
+        return temp;
+    })
+
     if (params.child) {
         return  {
             data: data,
@@ -41,7 +70,6 @@ export async function load({ fetch, params, locals}) {
         data.forEach(b => {
             if (b[a.location] == 'yes') {
                 let t = b.tags;
-                t = t.split(",");
                 t.forEach(c =>{
                     c = c.trim();
                     temp_ret.tags.add(c);
@@ -106,6 +134,7 @@ export async function load({ fetch, params, locals}) {
     return {
         data: data,
         countries: countries,
-        tags: tags
+        tags: tags, 
+        data_2: data_2
     }
 }

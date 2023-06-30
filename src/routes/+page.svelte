@@ -1,14 +1,15 @@
 <script>
     import { goto } from '$app/navigation';
+    import Region from '$components/Region.svelte'
 
     export let data;
     console.log(data)
     console.log(data.tags);
     console.log(data.countries);
-    let url = './';
+    // let url = './';
     // const 
 
-    const refine = (tags, countries) => {
+    const refine = (tags, countries, region) => {
 
         console.log(tags, tags.length , countries, countries.length)
         let url = './';
@@ -32,11 +33,20 @@
             url = url.substr(0, url.length - 1);
         }
 
+        url += '&';
+
+        if (region.length > 0) {
+            region.forEach(e => {
+                url += e + ',';
+            });
+            url = url.substr(0, url.length - 1);
+        }
+
         console.log(url);
-        return url;
+        navigate(url)
     }
 
-    const navigate = () => {
+    const navigate = (url) => {
         console.log("navigating to: ", url);
         goto(url);
     }
@@ -46,13 +56,13 @@
 <table>
     <thead>
         <th>
-            country    
+            tag   
         </th>
         <!-- <th>region</th> -->
 
         {#each Object.keys(data.tags) as tag}
             <th class='clickable' on:click={() => {
-                url = refine([tag], []),
+                url = refine([tag], [], []),
                 navigate()
             }}>{tag}</th>
         {/each}
@@ -60,133 +70,8 @@
     </thead>
 
     <tbody>
-        <tr>
-            <td></td>
-            <td class="heading-row" colspan="{Object.keys(data.tags).length }">Central Africa</td>
-        </tr>
-        {#each data.countries.central as c}
-            <tr>
-                <td class='clickable' on:click={() => {
-                    url = refine([], [c.country]),
-                    navigate()
-                }}>{c.country}</td>
-                <!-- <td on:click={() => {
-
-                }}>{c.region}</td> -->
-
-                {#each Object.keys(data.tags) as tag}
-                    <td on:click={() => {
-                        url = refine([tag], [c.country]),
-                        navigate()
-                    }} class="block tag-clickable {(data.tags[tag].has(c.country)) ? "has_tag" : "no_tag"}">
-
-                    </td>
-                {/each}
-            </tr>
-        {/each}
-
-        <tr>
-            <td></td>
-            <td class="heading-row" colspan="{Object.keys(data.tags).length }">North Africa</td>
-        </tr>
-
-        {#each data.countries.north as c}
-            <tr>
-                <td class='clickable' on:click={() => {
-                    url = refine([], [c.country]),
-                    navigate()
-                }}>{c.country}</td>
-                <!-- <td on:click={() => {
-
-                }}>{c.region}</td> -->
-
-                {#each Object.keys(data.tags) as tag}
-                    <td on:click={() => {
-                        url = refine([tag], [c.country]),
-                        navigate()
-                    }} class="block tag-clickable {(data.tags[tag].has(c.country)) ? "has_tag" : "no_tag"}">
-
-                    </td>
-                {/each}
-            </tr>
-        {/each}
-
-        <tr>
-            <td></td>
-            <td class="heading-row" colspan="{Object.keys(data.tags).length }">Southern Africa</td>
-        </tr>
-
-        {#each data.countries.south as c}
-            <tr>
-                <td class='clickable' on:click={() => {
-                    url = refine([], [c.country]),
-                    navigate()
-                }}>{c.country}</td>
-                <!-- <td on:click={() => {
-
-                }}>{c.region}</td> -->
-
-                {#each Object.keys(data.tags) as tag}
-                    <td on:click={() => {
-                        url = refine([tag], [c.country]),
-                        navigate()
-                    }} class="block tag-clickable {(data.tags[tag].has(c.country)) ? "has_tag" : "no_tag"}">
-
-                    </td>
-                {/each}
-            </tr>
-        {/each}
-
-        <tr>
-            <td></td>
-            <td class="heading-row" colspan="{Object.keys(data.tags).length }">East Africa</td>
-        </tr>
-
-        {#each data.countries.east as c}
-            <tr>
-                <td class='clickable' on:click={() => {
-                    url = refine([], [c.country]),
-                    navigate()
-                }}>{c.country}</td>
-                <!-- <td on:click={() => {
-
-                }}>{c.region}</td> -->
-
-                {#each Object.keys(data.tags) as tag}
-                    <td on:click={() => {
-                        url = refine([tag], [c.country]),
-                        navigate()
-                    }} class="block tag-clickable {(data.tags[tag].has(c.country)) ? "has_tag" : "no_tag"}">
-
-                    </td>
-                {/each}
-            </tr>
-        {/each}
-
-        <tr>
-            <td></td>
-            <td class="heading-row" colspan="{Object.keys(data.tags).length }">West Africa</td>
-        </tr>
-
-        {#each data.countries.west as c}
-            <tr>
-                <td class='clickable' on:click={() => {
-                    url = refine([], [c.country]),
-                    navigate()
-                }}>{c.country}</td>
-                <!-- <td on:click={() => {
-
-                }}>{c.region}</td> -->
-
-                {#each Object.keys(data.tags) as tag}
-                    <td on:click={() => {
-                        url = refine([tag], [c.country]),
-                        navigate()
-                    }} class="block tag-clickable {(data.tags[tag].has(c.country)) ? "has_tag" : "no_tag"}">
-
-                    </td>
-                {/each}
-            </tr>
+        {#each Object.keys(data.countries) as c}
+            <Region region={c} data={data.countries[c]} tags={data.tags} filter_function={refine} />
         {/each}
     </tbody>
 </table>
@@ -201,10 +86,7 @@
         table-layout: fixed;
     }
 
-    .heading-row {
-        text-align: center;
-        border: 1px solid;
-    }
+    
 
     th, td {
         word-wrap: break-word;
