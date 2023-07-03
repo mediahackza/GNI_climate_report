@@ -62,7 +62,7 @@
 
         {#each Object.keys(data.tags) as tag}
             <th class='clickable' on:click={() => {
-                url = refine([tag], [], []),
+                refine([tag], [], []),
                 navigate()
             }}>{tag}</th>
         {/each}

@@ -1,10 +1,8 @@
-import { isTemplateLiteral } from "typescript";
-
 export async function load({ parent, params }) {
-    let { data } = await parent({params: { child: true}});
+    // let { data } = await parent();
 
     console.log(params)
-    console.log(data);
+    // console.log(data);
 
     let temp = params.slug.split("&");
 
@@ -30,11 +28,10 @@ export async function load({ parent, params }) {
     }
 
     if(filters.region[0] == '') {
-        filters.region = []
+        filters.region = ['central', 'east', 'west', 'north', 'south']
     }
 
     return {
-        data,
         filters: filters
     };
 

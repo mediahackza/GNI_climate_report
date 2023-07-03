@@ -1,4 +1,18 @@
-export async function load({ fetch, params, locals}) {
+export async function load({ fetch, locals}) {
+
+    let ret = {
+        // local_check: false
+    }
+
+    if (!locals.data) {
+        
+    } else {
+        console.log("locals data exists");
+        ret = locals.data;
+        ret.local_check = true;
+        return ret
+    }
+    
 
 
     let url = "https://datadesk.dev/api/json.php?table=160";
@@ -44,11 +58,11 @@ export async function load({ fetch, params, locals}) {
         return temp;
     })
 
-    if (params.child) {
-        return  {
-            data: data,
-        }
-    }
+    // if (params.child) {
+    //     return  {
+    //         data: data,
+    //     }
+    // }
     
     let central = [];
     let east = [];
@@ -129,12 +143,14 @@ export async function load({ fetch, params, locals}) {
 
     //     countries.push[temp_ret];
     // })
+
+    ret.data = data;
+    ret.countries = countries;
+    ret.tags = tags; 
+    ret.data_2 = data_2
     
+
+    locals.data = ret;
     
-    return {
-        data: data,
-        countries: countries,
-        tags: tags, 
-        data_2: data_2
-    }
+    return ret;
 }
