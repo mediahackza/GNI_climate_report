@@ -51,7 +51,7 @@
 </style>
 <tr>
     <td></td>
-    <td class='heading-row' colspan="{Object.keys(tags).length}" 
+    <td class='clickable heading-row' colspan="{Object.keys(tags).length}" 
     on:click={
         () => {
             filter_function([], [], [region])

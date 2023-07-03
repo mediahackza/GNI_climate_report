@@ -86,6 +86,26 @@
         color: white
     }
 
+    table {
+        width: 90%;
+        margin: 20px auto;
+    }
+
+    thead {
+        background-color: #7B9E89;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    td {
+        padding: 5px 10px;
+        border: 1px solid gray
+    }
+
+    .tag-col {
+        text-align: center;
+    }
+
     .in-active {
         background-color: #eee;
     }
@@ -104,10 +124,41 @@
         flex-wrap: wrap;
     }
 
+    .region-container {
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        border-bottom: 1px solid gray;
+        margin: 10px;
+    }
+
+    .heading {
+        font-size: 20px;
+        font-weight: bold;
+        
+    }
+
+    .country-input {
+        display: block;
+        /* border: 1px solid red; */
+        margin: auto;
+        padding: 5px 10px;
+    }
+
+    .placeholder {
+        color: gray;
+        padding: 10px;
+    }
+
     
 </style>
 
-<div class="tag-container">
+<div class='region-container'>
+    <div class="heading">
+        Regions
+    </div>
+    <div class="tag-container">
+    
     <!-- {#each filters.region as t}
         <div on:click={remove_filter(filters.region, t)} class='tag active'>{t}</div>
     {/each} -->
@@ -122,12 +173,24 @@
 
 </div>
 
-<div class='tag-container'>
-    {#each filters.country as c}
-    <div on:click={remove_filter(filters.country, c)} class='tag'>{c}</div>
-    {/each}
+     
 </div>
-<input bin:this={country_input} list="countries" placeholder="add a country" on:change={add_filter(data.filters.country, this.value)}>
+
+<div class='region-container'>
+    <div class="heading">
+        Countries
+    </div>
+    <div class='tag-container'>
+        {#if filters.country.length == 0}
+            <div class='placeholder'>no country selected</div>
+        {/if}
+
+        {#each filters.country as c}
+        <div on:click={remove_filter(filters.country, c)} class='tag active'>{c}</div>
+        {/each}
+    </div>
+
+    <input class='country-input' bin:this={country_input} list="countries" placeholder="add a country" on:change={add_filter(data.filters.country, this.value)}>
 <datalist id="countries"  >
     <option value=''>add a country</option>
     {#each countries as country}
@@ -136,6 +199,9 @@
     {/if}
     {/each}
 </datalist>
+</div>
+
+
 
 <div class="tag-container">
     {#each filters.tag as t}
@@ -161,7 +227,7 @@
         {#each table_data as d}
             <tr>
                 <td><a href="{d.link}" tagret="_blank">{d.report}</a></td>
-                <td>{set_to_string(d.tags)}</td>
+                <td class="tag-col">{set_to_string(d.tags)}</td>
                 <!-- <td>{}</td -->
                 <!-- <td>{d.countries}</td> -->
 
