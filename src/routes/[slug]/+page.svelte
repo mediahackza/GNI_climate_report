@@ -14,9 +14,7 @@
 
     
 
-    countries = countries.sort((a,b) => {
-        return a.country.localeCompare(b.country)
-    })
+    
 
     const remove_filter = (arr, item) => {
         arr.splice(arr.indexOf(item), 1);
@@ -26,7 +24,6 @@
     }
 
     const add_filter = (arr, item) => {
-        console.log("adding a filter")
         arr.push(item);
         filters = filters;
         table_data = filter_data();
@@ -35,7 +32,6 @@
 
     const is_subset = (arr, subset) => {
         if (subset[0] == '') return true;
-        console.log("comparing: ", arr, subset)
         return !subset.some(v => {
             return !arr.has(v);
         })
@@ -46,25 +42,27 @@
         countries = [];
 
         Object.keys(data.countries).forEach(a => {
-            console.log("checking region:", a)
             if (filters.region.includes(a)) {
-                console.log("adding countries from region: ", a)
                 countries = [...countries, ...data.countries[a]]
             }
             
         });
 
-        console.log("countries: ", countries)
+        countries = countries.sort((a,b) => {
+            return a.country.localeCompare(b.country)
+        })
+        console.log("countries: ", countries, filters.country)
         
         data.data.filter(a => { 
             // console.log("country value:", a.countries)
             // console.log(is_subset(a.countries, filters.country))
             if (is_subset(a.countries, filters.country) && is_subset(a.tags, filters.tag) && is_subset(a.regions, filters.region)) {
-                console.log("this one counts")
+
                 filtered.push(a);
             }
         })
 
+        
         return filtered;
     }
 
@@ -77,6 +75,8 @@
     }
 
     table_data = filter_data();
+
+    
 
 </script>
 
@@ -194,7 +194,7 @@
 <datalist id="countries"  >
     <option value=''>add a country</option>
     {#each countries as country}
-    {#if filters.country.indexOf(country) == -1}
+    {#if filters.country.indexOf(country.country) == -1}
         <option value={country.country}>{country.country}</option>
     {/if}
     {/each}
