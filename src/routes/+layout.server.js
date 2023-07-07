@@ -1,156 +1,55 @@
-export async function load({ fetch, locals}) {
+export async function load({ locals, fetch }) {
+    let url = 'https://datadesk.dev/api/json.php?table=160';
+    let res = await fetch(url)
+    let data = await res.json()
 
-    let ret = {
-        // local_check: false
-    }
-
-    if (!locals.data) {
-        
-    } else {
-        console.log("locals data exists");
-        ret = locals.data;
-        ret.local_check = true;
-        return ret
-    }
-    
-
-
-    let url = "https://datadesk.dev/api/json.php?table=160";
-
-
-    let res = await fetch(url);
-    let data = await res.json();
-    
-    let url_2 = 'https://datadesk.dev/api/json.php?table=161';
-    let res_2 = await fetch(url_2);
-    let data_2 = await res_2.json();
-
-    // data = data.sort((a,b) => {
-    //     return b.region.localeCompare(a.region);
-    // })
-
-    data = data.map(a => {
-        let temp = {
-            report: a.report,
-            link: a.link,
-            tags:new Set(a.tags.split(",").map(a => {
-                return a.trim()
+    data = data.map(el => {
+        let regions = new Set()
+        return {
+            report: el.report,
+            link: el.link,
+            regions: new Set(),
+            countries: new Set(Object.keys(el).filter(a => {
+                if (el[a] == 'yes'){
+                    regions.add()
+                    return a; 
+                }            
             })),
-            countries: new Set(),
-            regions: new Set()
+            tags: new Set(el.tags.split(",").map(a => a.trim()))
         }
+    });
+    //   
 
-        Object.keys(a).forEach(b => {
-            if (b == 'report' || b == 'link' || b == 'tags') {
-                return;
-            } else {
-                temp[b] = a[b];
-            }
-
-            if (a[b] == 'yes') {
-                temp.countries.add(b);
-                temp.regions.add(data_2.filter(a => {
-                    return a.location == b;
-                })[0].region);
-            }
-        })
-
-        return temp;
-    })
-
-    // if (params.child) {
-    //     return  {
-    //         data: data,
-    //     }
-    // }
-    
-    let central = [];
-    let east = [];
-    let west = [];
-    let north = [];
-    let south = [];
-    let temp_tags = {};
-
-    data_2.forEach(a => {
-        let temp_ret = {
-            id: a[""],
-            code: a.iso_code,
-            region: a.region,
-            country: a.location,
+    let url_2 = 'https://datadesk.dev/api/json.php?table=161';
+    let res_2 = await fetch(url_2)
+    let data_2 = await res_2.json()
+    let countries = {};
+    let tags = new Set();
+    data_2 = data_2.map(el => {
+        countries[el.location] = {
+            iso: el.iso_code,
+            country: el.location,
+            region: el.region_1,
+            subregion: el.region_2,
             tags: new Set(),
-            reports: new Set()
+            reports: new Set(),
         }
+    });
 
-        data.forEach(b => {
-            if (b[a.location] == 'yes') {
-                let t = b.tags;
-                t.forEach(c =>{
-                    c = c.trim();
-                    temp_ret.tags.add(c);
-                    temp_ret.reports.add(b.report);
-                    if (!temp_tags.hasOwnProperty(c)) {
-                        temp_tags[c] = new Set();
-                    }
-                    temp_tags[c].add(a.location);
-                })
-            }
-        });
+    data.forEach((item, index) => {
 
-        switch (a.region) {
-            case 'central':
-                central.push(temp_ret);
-                break;
-            case 'east':
-                east.push(temp_ret);
-                break;
-            case 'west':
-                west.push(temp_ret);
-                break;
-            case 'north':
-                north.push(temp_ret);
-                break;
-            case 'south':
-                south.push(temp_ret);
-                break;
-        }
+        item.countries.forEach(country => {
+            item.tags.forEach(tag => {
+                countries[country].tags.add(tag);
+                tags.add(tag);
+                countries[country].reports.add(index)
+            });
+        })
     })
 
-    let countries = {
-        central: central,
-        east: east,
-        west: west,
-        north: north,
-        south: south
-    }
-    
-    // data_2.forEach(a => {
-    //     let temp_ret = {
-    //         id: a[""],
-    //         code: a.iso_code,
-    //         region: a.region,
-    //         name: a.location,
-    //         tags: new Set(),
-    //         reports: new Set()
-    //     };
-    
-        
-
-    console.log("temp tags are:", temp_tags)
-
-    const tags = temp_tags
-    
-        
-
-    //     countries.push[temp_ret];
-    // })
-
-    ret.data = data;
-    ret.countries = countries;
-    ret.tags = tags; 
-    ret.data_2 = data_2
-    
-
-    locals.data = ret;
-    
-    return ret;
+    return {
+        data,
+        countries: countries,
+        tags: tags
+    };
 }

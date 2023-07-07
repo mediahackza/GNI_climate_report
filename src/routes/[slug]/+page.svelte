@@ -1,237 +1,46 @@
 <script>
+    import Country from '$components/Country.svelte';
+    import Sorting from '$components/Sorting_system.svelte'
+    export let data 
 
-    export let data;
+    console.log("data:", data)
 
-    console.log(data);
-
-    let filters = data.filters;
-    console.log("filters: ", filters)
-    let table_data = data.data
-
-    let country_input;
-
-    let countries = [];
-
-    
-
-    
-
-    const remove_filter = (arr, item) => {
-        arr.splice(arr.indexOf(item), 1);
-        filters = filters;
-        table_data = filter_data();
-        
-    }
-
-    const add_filter = (arr, item) => {
-        arr.push(item);
-        filters = filters;
-        table_data = filter_data();
-        // country_input.value = '';
+    const refresh = () => {
+        data = data
     }
 
     const is_subset = (arr, subset) => {
-        if (subset[0] == '') return true;
-        return !subset.some(v => {
-            return !arr.has(v);
+        if (subset[0] == '') return false;
+        console.log("arr:", arr)
+        console.log("subset:", subset)
+        console.log(Array.from(subset).every(v => {
+            return arr.has(v)
+        }))
+        return Array.from(subset).every(v => {
+            return arr.has(v)
         })
     }
-
-    const filter_data = () => {
-        let filtered = [];
-        countries = [];
-
-        Object.keys(data.countries).forEach(a => {
-            if (filters.region.includes(a)) {
-                countries = [...countries, ...data.countries[a]]
-            }
-            
-        });
-
-        countries = countries.sort((a,b) => {
-            return a.country.localeCompare(b.country)
-        })
-        console.log("countries: ", countries, filters.country)
-        
-        data.data.filter(a => { 
-            // console.log("country value:", a.countries)
-            // console.log(is_subset(a.countries, filters.country))
-            if (is_subset(a.countries, filters.country) && is_subset(a.tags, filters.tag) && is_subset(a.regions, filters.region)) {
-
-                filtered.push(a);
-            }
-        })
-
-        
-        return filtered;
-    }
-
-    const set_to_string = (set) => {
-        let str = '';
-        set.forEach(a => {
-            str += a + ', ';
-        })
-        return str.substr(0, str.length - 2);
-    }
-
-    table_data = filter_data();
-
-    
-
 </script>
 
-<style>
-    .active {
-        background-color: #7B9E89;
-        color: white
-    }
-
-    table {
-        width: 90%;
-        margin: 20px auto;
-    }
-
-    thead {
-        background-color: #7B9E89;
-        color: white;
-        font-size: 1.5rem;
-    }
-
-    td {
-        padding: 5px 10px;
-        border: 1px solid gray
-    }
-
-    .tag-col {
-        text-align: center;
-    }
-
-    .in-active {
-        background-color: #eee;
-    }
-    .tag {
-        display: inline-block;
-        padding: 5px;
-        margin: 5px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .tag-container {
-        align-items: center;
-        justify-content: center;
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .region-container {
-        justify-content: center;
-        text-align: center;
-        padding: 10px;
-        border-bottom: 1px solid gray;
-        margin: 10px;
-    }
-
-    .heading {
-        font-size: 20px;
-        font-weight: bold;
-        
-    }
-
-    .country-input {
-        display: block;
-        /* border: 1px solid red; */
-        margin: auto;
-        padding: 5px 10px;
-    }
-
-    .placeholder {
-        color: gray;
-        padding: 10px;
-    }
-
-    
-</style>
-
-<div class='region-container'>
-    <div class="heading">
-        Regions
-    </div>
-    <div class="tag-container">
-    
-    <!-- {#each filters.region as t}
-        <div on:click={remove_filter(filters.region, t)} class='tag active'>{t}</div>
-    {/each} -->
-
-    {#each Object.keys(data.countries) as region}
-        {#if filters.region.indexOf(region) == -1}
-            <div on:click={add_filter(filters.region, region)} class='tag in-active'>{region}</div>
-        {:else}
-        <div on:click={remove_filter(filters.region, region)} class='tag active'>{region}</div>
-        {/if}
-    {/each}
-
-</div>
-
-     
-</div>
-
-<div class='region-container'>
-    <div class="heading">
-        Countries
-    </div>
-    <div class='tag-container'>
-        {#if filters.country.length == 0}
-            <div class='placeholder'>no country selected</div>
-        {/if}
-
-        {#each filters.country as c}
-        <div on:click={remove_filter(filters.country, c)} class='tag active'>{c}</div>
-        {/each}
-    </div>
-
-    <input class='country-input' bin:this={country_input} list="countries" placeholder="add a country" on:change={add_filter(data.filters.country, this.value)}>
-<datalist id="countries"  >
-    <option value=''>add a country</option>
-    {#each countries as country}
-    {#if filters.country.indexOf(country.country) == -1}
-        <option value={country.country}>{country.country}</option>
-    {/if}
-    {/each}
-</datalist>
-</div>
-
-
-
-<div class="tag-container">
-    {#each filters.tag as t}
-        <div on:click={remove_filter(filters.tag, t)} class='tag active'>{t}</div>
-    {/each}
-
-    {#each Object.keys(data.tags) as tag}
-        {#if filters.tag.indexOf(tag) == -1}
-            <div on:click={add_filter(filters.tag, tag)} class='tag in-active'>{tag}</div>
-        {/if}
-    {/each}
-
-</div>
-
+<Sorting active_filters={data.active_filters} data={data} refresh={refresh}/>
 
 <table>
     <thead>
-        <th>report</th>
-        <th>tags</th>
+
+        <th>Report</th>
     </thead>
 
     <tbody>
-        {#each table_data as d}
+        {#each data.data as report}
             <tr>
-                <td><a href="{d.link}" tagret="_blank">{d.report}</a></td>
-                <td class="tag-col">{set_to_string(d.tags)}</td>
-                <!-- <td>{}</td -->
-                <!-- <td>{d.countries}</td> -->
-
+            {#if is_subset(report.tags, data.active_filters.tags) && is_subset(report.countries, data.active_filters.countries) }
+                <td>
+                    <a href='{report.link}' target='_blank'>{report.report}</a>
+                </td>
+                {/if}
             </tr>
         {/each}
     </tbody>
+
 </table>
+
