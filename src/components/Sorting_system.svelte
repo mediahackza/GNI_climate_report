@@ -32,7 +32,7 @@
         refresh();
     }
 </script>
-<div class='container' >
+<div class='container inactive' >
     {#each regions as region}
         
         {#if active_filters.regions.has(region)}
@@ -58,7 +58,7 @@
     
 </div>
 
-<div class='container' >
+<div class='container inactive' >
     {#each subregions as subregion}
         
         {#if active_filters.subregions.has(subregion)}
@@ -82,7 +82,7 @@
     {/each}
 </div>
 
-<div class="block container">
+<div class="block container inactive">
     <div class='heading'>tags</div>
     <div class='container'>
         {#each Array.from(active_filters.tags) as tag}
@@ -116,7 +116,7 @@
 </div>
 
 
-<div class='block container'>
+<div class='block container inactive'>
     <div class='heading'>Countries</div>
 
     <div class='container'>
@@ -148,6 +148,10 @@
 </div>
 
 <style>
+
+    .inactive {
+        display: none !important;
+    }
     .container {
         display: flex;
         justify-content: center;

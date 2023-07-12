@@ -1,42 +1,38 @@
-export async function load({ locals, params }) {
-    console.log(params);
-    let item = params.slug.split("&");
+export async function load({ parent, params }) {
+    // let { data } = await parent();
+
+    console.log(params)
+    // console.log(data);
+
+    let temp = params.slug.split("&");
+
+    let tag = temp[0];
+    let country= temp[1];
+    let region = temp[2];
+
+    
 
 
-    let active_filters = {
-        countries: new Set(),
-        tags: new Set(),
-        regions: new Set(),
-        subregions: new Set()
+    let filters = {
+        country: country.split(","),
+        tag: tag.split(","),
+        region: region.split(",")
     }
 
-    item[0].split(",").forEach(a => {
-        if (a != '') {
-            active_filters.countries.add(a);
-        }
-    })
+    if (filters.country[0] == '') {
+        filters.country = []
+    }
 
-    item[1].split(",").forEach(a => {
-        if (a != '') {
-            active_filters.countries.add(a);
-        }
-    });
+    if (filters.tag[0] == '') {
+        filters.tag = []
+    }
 
-    item[2].split(",").forEach(a => {
-        if (a != ''){
-            active_filters.regions.add(a);
-        }
-        
-    });
-
-    item[3].split(",").forEach(a => {
-        if (a != '') {
-            active_filters.subregions.add(a);
-        }
-    });
+    if(filters.region[0] == '') {
+        filters.region = ['central', 'east', 'west', 'north', 'south']
+    }
 
     return {
-        active_filters
+        filters: filters
     };
-    
+
 }

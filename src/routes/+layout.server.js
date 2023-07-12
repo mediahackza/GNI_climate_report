@@ -1,3 +1,4 @@
+
 export async function load({ locals, fetch }) {
     let url = 'https://datadesk.dev/api/json.php?table=160';
     let res = await fetch(url)
@@ -25,7 +26,16 @@ export async function load({ locals, fetch }) {
     let data_2 = await res_2.json()
     let countries = {};
     let tags = new Set();
+    let subregions = new Set();
+
+    let countries_tags = new Set();
+
+
     data_2 = data_2.map(el => {
+        if (el.region_2!= '') {
+            subregions.add(el.region_2);
+        }
+       
         countries[el.location] = {
             iso: el.iso_code,
             country: el.location,
@@ -47,9 +57,63 @@ export async function load({ locals, fetch }) {
         })
     })
 
+   tags = Array.from(tags).map(a => {
+        return {
+            type: 'tag',
+            name: a
+        }
+   })
+
+   tags = [...tags,...[
+    {
+        type: 'region',
+        name: 'central'
+    },
+    {
+        type: 'region',
+        name: 'east'
+    },
+    {
+        type: 'region',
+        name: 'west'
+    }, {
+        type: 'region',
+        name: 'north'
+    },
+    {
+        type: 'region',
+        name: 'south'
+    }
+   ],
+   ...Array.from(subregions).map(e => {
+    let ret = {
+        type: 'subregion',
+        name: ''
+    }
+
+    switch (e) {
+        case 'ssa':
+            ret.name = 'Sub-Saharan Africa'
+            break;
+        case 'na':
+            ret.name = 'North Africa';
+            break;
+
+    }
+
+    return ret;
+   }), 
+   ...Object.keys(countries).map(a => {
+    return {
+        type: 'country',
+        name: a
+    }
+   })]
+
+
     return {
         data,
         countries: countries,
-        tags: tags
+        tags: tags,
     };
 }
