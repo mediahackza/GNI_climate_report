@@ -2,6 +2,7 @@
 
     export let search_items;
     let table_type = false;
+    let allow_show_all = true;
 
     let tags = [];
     let countries = [];
@@ -14,7 +15,7 @@
     let country_eg = false;
 
     let tag_count =0;
-        let country_count = 0;
+    let country_count = 0;
 
         $: search_items.forEach((t, i) => {
             if (i == 0 ) {
@@ -33,18 +34,14 @@
             }
         })
 
-    while(!tag_eg && country_eg) {
-        let i = Math.floor(Math.random() * search_items.length);
-        if (search_items[i].type == 'tag') {
-            tag_eg = search_items[i];
-        }
-
-        if (search_items[i].type == 'country') {
-            country_eg = search_items[i];
-        }
-    }
 
     const filter_data = () => {
+        if (allow_show_all && search_filter == '') {
+            console.log('show all')
+            data = search_items.filter(item => {
+                return item.active == false;
+            })
+        }
         data = search_items.filter(item => {
             return (item.name.toUpperCase()).startsWith(search_filter.toUpperCase()) && item.active == false;
         })
@@ -78,6 +75,12 @@
 
 
 <div class="container {!table_type ? 'container-large' : ''} {search_filter != 0 ? 'container-small' : ''}">
+    {#if tag_count == 0 && country_count == 0}
+    <div class="details">
+        type here to search reports by country or tag
+    </div>
+{/if}
+    
     <div class="input-container">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=" search-icon lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
 
@@ -112,12 +115,17 @@
 </div>
 
 <style>
+
+    .details {
+        text-align: center;
+        margin: 20px 0px;
+    }
     .search-res {
         /* border: 1px solid red; */
         width: 95%;
         margin: 0px 2.5%;
         overflow-y: scroll;
-        /* max-height: 100%; */
+        max-height: 50vh;
         height: fit-content !important;
         /* display: block; */
         flex: 1;
