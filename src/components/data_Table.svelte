@@ -7,7 +7,6 @@
 
     import { goto } from '$app/navigation';
 
-    // $: console.log("active tags: ", active_tags, countries)
 
     let tags = [];
     let country_tags = [];
@@ -15,18 +14,6 @@
 
     const navigate = (tags, countries, regions, subregions) => {
 
-// let active_filters = {
-
-    // }
-
-    // tag_list.forEach(a => {
-    //     if (a.active) {
-    //         if (active_filters[a.type] == undefined) {
-    //             active_filters[a.type] = new Set();
-    //         }
-    //         active_filters[a.type].add(a.name);
-    //     }
-    // });
 
         let url = './';
         if (tags.length > 0) {
@@ -44,7 +31,6 @@
         if (subregions.length > 0) {
             url += Array.from(subregions).join(',') + '&';
         }
-        console.log("url:", url)
         goto(url);
     }
 
@@ -54,7 +40,6 @@
             country_tags = [];
 
         }
-        // console.log("runnign thi thing")
         if (a.active == false && dev_mode == false) return;
         if (a.type == 'country') {
             country_tags.push(a.name)
@@ -64,8 +49,6 @@
         }
     })
 
-    // $: console.log("tags:", tags)
-    // $: console.log("countries:", country_tags)
 
 </script>
 

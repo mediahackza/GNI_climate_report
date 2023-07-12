@@ -3,10 +3,7 @@
     export let data;
     
 
-    console.log(data);
-
     let filters = data.filters;
-    console.log("filters: ", filters)
     let table_data = data.data
 
     let country_input;
@@ -58,11 +55,8 @@
         countries = countries.sort((a,b) => {
             return a.country.localeCompare(b.country)
         })
-        console.log("countries: ", countries, filters.country)
         
         data.data.filter(a => { 
-            // console.log("country value:", a.countries)
-            // console.log(is_subset(a.countries, filters.country))
             if (is_subset(a.countries, filters.country) && is_subset(a.tags, filters.tag) && is_subset(a.regions, filters.region)) {
 
                 filtered.push(a);

@@ -21,7 +21,6 @@
                 tag_count =0;
                 country_count = 0;
             }
-            // console.log("tag:", t)
             if (t.active) {
                 switch (t.type) {
                     case 'tag':
@@ -74,27 +73,11 @@
 
         return return_value;
     }
-    $: console.log("table type from search container: ", table_type)
-    // $: search_items.forEach((item, index) => {
-    //     item.index = index;
-    //     let g_item;
-    //     if ( g_item = has_item(groups, item.type, 'name') ) {
-    //         g_item.items.push(item);
-    //     } else {
-    //         groups.push({
-    //             name: item.type,
-    //             items: [item]
-    //         })
-    //     }  
-
-    // })
-        // $: console.log(search_filter)
-
-    $: table_type = ((tag_count > 0 && country_count > 0))
+    $: table_type = (tag_count != 0 || country_count != 0)
 </script>
 
 
-<div class="container {!table_type ? 'container-large' : 'small-container'}">
+<div class="container {!table_type ? 'container-large' : ''}">
     <div class="input-container">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=" search-icon lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
 

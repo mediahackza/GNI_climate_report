@@ -4,21 +4,7 @@ export async function load({ locals, fetch }) {
     let res = await fetch(url)
     let data = await res.json()
 
-    data = data.map(el => {
-        let regions = new Set()
-        return {
-            report: el.report,
-            link: el.link,
-            regions: new Set(),
-            countries: new Set(Object.keys(el).filter(a => {
-                if (el[a] == 'yes'){
-                    regions.add()
-                    return a; 
-                }            
-            })),
-            tags: new Set(el.tags.split(",").map(a => a.trim()))
-        }
-    });
+    
     //   
 
     let url_2 = 'https://datadesk.dev/api/json.php?table=161';
@@ -46,6 +32,22 @@ export async function load({ locals, fetch }) {
         }
     });
 
+    data = data.map(el => {
+        let regions = new Set()
+        return {
+            report: el.report,
+            link: el.link,
+            regions: new Set(),
+            countries: new Set(Object.keys(el).filter(a => {
+                if (el[a] == 'yes'){
+                    regions.add(countries[a].region)
+                    return a; 
+                }            
+            })),
+            tags: new Set(el.tags.split(",").map(a => a.trim()))
+        }
+    });
+
     data.forEach((item, index) => {
 
         item.countries.forEach(country => {
@@ -54,6 +56,7 @@ export async function load({ locals, fetch }) {
                 tags.add(tag);
                 countries[country].reports.add(index)
             });
+            item.regions.add(countries[country].region)
         })
     })
 

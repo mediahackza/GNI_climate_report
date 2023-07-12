@@ -21,5 +21,6 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
+        margin: 10px;
     }
 </style>

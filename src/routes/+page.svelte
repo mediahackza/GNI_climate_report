@@ -12,7 +12,6 @@
     console.log("data:", data);
 
     let region_index = {};
-
     let tag_list = data.tags.map((t, i) => {
         if (t.type == 'region' || t.type == 'subregion') {
             region_index[t.name] = i;
@@ -20,7 +19,6 @@
         return new Tag_con(t.type, t.name)}
     );
 
-    console.log("tag_list:", tag_list);
 
     tag_list.forEach(t => {
         
@@ -44,54 +42,21 @@
             
             tag_list[region_index[data.countries[t.name].region]].addChild(t);
             
-            console.log(t.name, data.countries[t.name].region, tag_list[region_index[data.countries[t.name].region]].children);
         }
         // if (t.type == 'country') {
         //     tag_list[data.countries[t.name].region].addChild(t);
         // }
     })
 
-
-
-    console.log("region_index:", region_index);
-    // console.log("tag_list:", tag_list);
-
-    // let regions = ['central', 'east', 'north', 'south', 'west'];
-    // let subregions = ['ssa','na'];
-
-    // let active_filters = {
-    //     tags: new Set(), 
-    //     countries: new Set(),
-    //     regions: new Set(regions),
-    //     subregions: new Set()
-    // }
-
-    // const refresh = () => {
-    //     data = data;
-    //     active_filters = active_filters;
-    // }
-
-    
-
-    // const get_long = (subregion) => {
-    //     switch (subregion) {
-    //         case 'ssa':
-    //             return 'Sub-Saharan Africa';
-    //         case 'na':
-    //             return 'Northern Africa';  
-    //         default:
-    //             return subregion;
-    //     }
-    // }
         let tag_count =0;
         let country_count = 0;
 
-        $: tag_list.forEach((t, i) => {
+        $: tag_list = tag_list.map((t, i) => {
+            console.log()
             if (i == 0 ) {
                 tag_count =0;
                 country_count = 0;
             }
-            // console.log("tag:", t)
             if (t.active) {
                 switch (t.type) {
                     case 'tag':
@@ -102,19 +67,18 @@
                         break;
                 }
             }
+
+            return t
         })
     
 
     let table_t = false;
     $: table_t = ((tag_count > 0 && country_count > 0))
 
-    $: console.log("count:", tag_count, country_count, table_t)
 
     const table_type = () => {
-        // console.log("this thing is: ", (!(tag_count == 0 && country_count == 0)) && (tag_count == 0 || country_count == 0))
-        return (tag_count == 0 || country_count == 0)
+       return (tag_count == 0 || country_count == 0)
     }
-
     
 </script>
 
@@ -124,14 +88,15 @@
 <SearchBar bind:search_items={tag_list} />
 
 <TagContainer bind:tag_list={tag_list} />
-
-{#if ((tag_count != 0 || country_count != 0) && (tag_count == 0 || country_count == 0))}
-    <ReportTable bind:tag_list={tag_list} table_data={data.data} countries_raw={data.countries}/>
-{/if}
-
 {#if tag_count != 0 && country_count != 0}
-    <DataTable bind:active_tags={tag_list} countries={data.countries} bind:table_type={table_t}/>
+    <DataTable bind:active_tags={tag_list} countries={data.countries}/>
 {/if}
+
+{#if (tag_count != 0 || country_count != 0)}
+    <ReportTable bind:tag_list={tag_list} table_data={data.data}/>
+{/if}
+
+
 
     <!-- {/if} --
 <!-- <table>

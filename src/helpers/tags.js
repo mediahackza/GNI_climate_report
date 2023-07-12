@@ -18,9 +18,7 @@ const tag = {
         this.active = !this.active;
     },
     set_active(value) {
-        console.log(`setting tag ${this.name} to ${value}`)
         this.active = value;
-        console.log("children", this.children)
         this.children.forEach(e => {
             e.set_active(value);
         });
