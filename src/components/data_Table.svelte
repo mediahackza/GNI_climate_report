@@ -84,6 +84,16 @@
 </table>
 
 <style>
+    table {
+        margin: auto;
+        width: 80%
+    }
+
+    td, th {
+        border: 1px solid lightgray;
+        padding: 5px;
+        text-align: center;
+    }
     .has_tag {
         background-color: #C5D86D;
     }

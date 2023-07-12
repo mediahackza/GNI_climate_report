@@ -77,14 +77,19 @@
 </script>
 
 
-<div class="container {!table_type ? 'container-large' : ''}">
+<div class="container {!table_type ? 'container-large' : ''} {search_filter != 0 ? 'container-small' : ''}">
     <div class="input-container">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=" search-icon lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
 
-        <input type='text'  bind:value={search_filter} on:input={filter_data}>
+        <input type='text'  bind:value={search_filter} on:input={filter_data} placeholder='try Algeria or emissions ... '>
     </div>
 
 <div class='search-res {(search_filter == '') ? 'inactive' : 'active'}' >
+    {#if data.length == 0}
+        <div class="item">
+            <div class="name">No results found</div>
+        </div>
+    {/if}
     {#each data as item}
         <!-- {#if item.active == false && (item.name.toUpperCase()).includes(search_filter.toUpperCase())} -->
             <div class='item' on:click={() => {
@@ -100,22 +105,28 @@
     {/each}
 </div>
 
-{#if !table_type}
+<!-- {#if !table_type}
 <div class="paragraph">try searchig for a tag like <span class='tag-mini'>{tag_eg.name}</span> or a country such as <span class='tag-mini'>{country_eg.name}</span></div>
-{/if}
+{/if} -->
 
 </div>
 
 <style>
     .search-res {
-        border: 1px solid red;
-        width: 90%;
-        margin: auto;
+        /* border: 1px solid red; */
+        width: 95%;
+        margin: 0px 2.5%;
         overflow-y: scroll;
-        /* height: fit-content */
-        max-height: 100%;
+        /* max-height: 100%; */
+        height: fit-content !important;
+        /* display: block; */
         flex: 1;
-        
+        border: 1px solid lightgray;
+        /* border: 1px solid black; */
+    }
+    
+    .item {
+        /* border: 1px solid blue; */
     }
 
     .search-icon  {
@@ -149,7 +160,7 @@
     }
 
     .active {
-        display: block;
+        display: inline-block;
     }
 
     input {
@@ -161,15 +172,14 @@
     }
 
     .container {
-        border: 1px solid red;
+        /* border: 1px solid red; */
         width: 60%;
         margin: auto;
-        max-height: 50vh;
+        max-height: 95vh;
         padding: 10px 0px;
-        overflow-y: hidden;
-        display: flex;
+        overflow: hidden;
+
         flex-direction: column;
-        
     }
 
     .container-large {
@@ -178,6 +188,11 @@
         /* align-items: center; */
         justify-content: center;
         margin: auto;
+        display: flex;
+    }
+
+    .container-small {
+        display: block !important;
     }
 
     .input-container {
