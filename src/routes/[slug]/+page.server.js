@@ -16,7 +16,8 @@ export async function load({ parent, params }) {
     let filters = {
         country: country.split(","),
         tag: tag.split(","),
-        region: region.split(",")
+        region: region.split(","),
+        subregion: [],
     }
 
     if (filters.country[0] == '') {

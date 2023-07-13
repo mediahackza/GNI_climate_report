@@ -1,5 +1,5 @@
 <script>
-
+    import { fade, fly } from 'svelte/transition';
     export let search_items;
     let table_type = false;
     let allow_show_all = true;
@@ -16,6 +16,11 @@
 
     let tag_count =0;
     let country_count = 0;
+
+    let search_bar_x;
+    let search_bar_y;
+
+    $:console.log(search_bar_x, search_bar_y)
 
         $: search_items.forEach((t, i) => {
             if (i == 0 ) {
@@ -36,7 +41,7 @@
 
 
     const filter_data = () => {
-        if (allow_show_all && search_filter == '') {
+        if (allow_show_all && search_filter == null) {
             console.log('show all')
             data = search_items.filter(item => {
                 return item.active == false;
@@ -77,25 +82,25 @@
 <div class="container {!table_type ? 'container-large' : ''} {search_filter != 0 ? 'container-small' : ''}">
     {#if tag_count == 0 && country_count == 0}
     <div class="details">
-        type here to search reports by country or tag
+        type here to search reports by country, region or tag
     </div>
 {/if}
     
-    <div class="input-container">
+    <div class="input-container" bind:offsetHeight={search_bar_y} bind:offsetWidth={search_bar_x}>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=" search-icon lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
 
-        <input type='text'  bind:value={search_filter} on:input={filter_data} placeholder='try Algeria or emissions ... '>
+        <input type='text'    bind:value={search_filter} on:input={filter_data} placeholder='try Algeria or emissions ... '>
     </div>
 
-<div class='search-res {(search_filter == '') ? 'inactive' : 'active'}' >
+<div   class='search-res {(search_filter == '') ? 'inactive' : 'active'}' >
     {#if data.length == 0}
-        <div class="item">
+        <div  class="item">
             <div class="name">No results found</div>
         </div>
-    {/if}
+    {:else}
     {#each data as item}
         <!-- {#if item.active == false && (item.name.toUpperCase()).includes(search_filter.toUpperCase())} -->
-            <div class='item' on:click={() => {
+            <div  class='item' on:click={() => {
                 item.set_active(true)
                 search_items = search_items
                 search_filter = ''
@@ -106,6 +111,7 @@
             </div>
         <!-- {/if} -->
     {/each}
+    {/if}
 </div>
 
 <!-- {#if !table_type}

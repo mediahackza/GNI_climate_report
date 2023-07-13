@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
 
     export let data;
     
@@ -79,8 +79,8 @@
 
     
 
-</script>
-
+</script> -->
+<!-- 
 <style>
 
     :global(body) {
@@ -176,8 +176,33 @@
                     <!-- <td>{}</td -->
                     <!-- <td>{d.countries}</td> -->
 
-                </tr>
+                <!-- </tr>
                 {/if}
             {/each}
         </tbody>
-    </table>
+    </table> --> 
+
+    <script>
+    import Tag from "$components/Tag.svelte";
+        import ReportTable from "$components/report_table.svelte";
+        import { Tag_con } from '$helpers/tags.js';
+
+        export let data;
+
+        console.log(data);
+
+        
+
+        let tag_list = data.tags.map(a => {
+            let t = new Tag_con(a.type, a.name);
+            // console.log(data.filters[a.type].includes(a.name))
+            if (data.filters[a.type].includes(a.name)) {
+                t.set_active(true)
+            }
+            return t;
+        })
+
+
+</script>
+
+<ReportTable bind:tag_list={tag_list} table_data={data.data} />
