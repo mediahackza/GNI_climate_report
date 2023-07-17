@@ -1,26 +1,24 @@
 <script>
+  import Tag from '$components/Tag.svelte'
 
-    import Tag from '$components/Tag.svelte'
+  export let tag_list
 
-    export let tag_list;
-
-    $: tag_list = tag_list;
-
+  $: tag_list = tag_list
 </script>
 
 <div class="container">
-    {#each tag_list as tag}
+  {#each tag_list as tag}
     {#if tag.active == true}
-        <Tag bind:tag={tag}/>
+      <Tag bind:tag />
     {/if}
-    {/each}
+  {/each}
 </div>
 
 <style>
-    .container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin: 10px;
-    }
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 10px;
+  }
 </style>

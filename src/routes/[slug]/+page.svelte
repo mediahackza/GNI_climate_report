@@ -174,35 +174,31 @@
                     <td><a href="{d.link}" tagret="_blank">{d.report}</a></td>
                     <td class="tag-col">{set_to_string(d.tags)}</td>
                     <!-- <td>{}</td -->
-                    <!-- <td>{d.countries}</td> -->
+<!-- <td>{d.countries}</td> -->
 
-                <!-- </tr>
+<!-- </tr>
                 {/if}
             {/each}
         </tbody>
-    </table> --> 
+    </table> -->
 
-    <script>
-    import Tag from "$components/Tag.svelte";
-        import ReportTable from "$components/report_table.svelte";
-        import { Tag_con } from '$helpers/tags.js';
+<script>
+  import Tag from '$components/Tag.svelte'
+  import ReportTable from '$components/report_table.svelte'
+  import { Tag_con } from '$helpers/tags.js'
 
-        export let data;
+  export let data
 
-        console.log(data);
+  console.log(data)
 
-        
-
-        let tag_list = data.tags.map(a => {
-            let t = new Tag_con(a.type, a.name);
-            // console.log(data.filters[a.type].includes(a.name))
-            if (data.filters[a.type].includes(a.name)) {
-                t.set_active(true)
-            }
-            return t;
-        })
-
-
+  let tag_list = data.tags.map((a) => {
+    let t = new Tag_con(a.type, a.name)
+    // console.log(data.filters[a.type].includes(a.name))
+    if (data.filters[a.type].includes(a.name)) {
+      t.set_active(true)
+    }
+    return t
+  })
 </script>
 
-<ReportTable bind:tag_list={tag_list} table_data={data.data} />
+<ReportTable bind:tag_list table_data={data.data} />
