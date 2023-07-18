@@ -92,6 +92,9 @@
     <table>
       <thead>
         <th>report</th>
+        <th>description</th>
+        <th>publisher</th>
+        <td>period covered</td>
         <td>tags</td>
       </thead>
 
@@ -100,6 +103,9 @@
           {#if is_Active(t)}
             <tr>
               <td><a href={t.link} target="_blank">{t.report}</a></td>
+              <td>{t.blurb}</td>
+              <td>{t.publisher}</td>
+              <td>{t.period_covered}</td>
               <td>
                 {#each Array.from(t.tags) as tag}
                   <span

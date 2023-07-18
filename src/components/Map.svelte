@@ -60,7 +60,7 @@
   .chart {
     width: 100%;
     height: 50vh;
-    border: 1px solid red;
+    /* border: 1px solid red; */
     margin: 0px;
   }
   :global(.front) {

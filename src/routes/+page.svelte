@@ -10,7 +10,8 @@
   import SearchContainer from '$components/Search_container.svelte'
   import { Tag_con } from '$helpers/tags.js'
   export let data
-  console.log('data:', data)
+  console.log('data:', data);
+  
   let subjectTags = data.tags.filter((t) => t.type == 'tag')
 
   let region_index = {}
@@ -117,9 +118,9 @@
 
     <TagContainer bind:tag_list />
 
-    <!-- {#if tag_count != 0 && country_count != 0}
+    {#if tag_count != 0 && country_count != 0}
       <DataTable bind:active_tags={tag_list} countries={data.countries} />
-    {/if} -->
+    {/if}
 
     {#if tag_count != 0 || country_count != 0}
       <ReportTable bind:tag_list table_data={data.data} />
