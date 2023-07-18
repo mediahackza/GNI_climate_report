@@ -189,9 +189,10 @@
 
   export let data
 
-  console.log(data)
+ 
 
   let tag_list = data.tags.map((a) => {
+    
     let t = new Tag_con(a.type, a.name)
     // console.log(data.filters[a.type].includes(a.name))
     if (data.filters[a.type].includes(a.name)) {
@@ -199,6 +200,8 @@
     }
     return t
   })
+
+  console.log(data)
 </script>
 
 <ReportTable bind:tag_list table_data={data.data} />

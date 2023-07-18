@@ -108,7 +108,7 @@
       <div class="panel-subtitle">
         Select a Country
         <span class="panel-subtitle-sub">(optional)</span>
-        <Map />
+        <Map countries={data.countries} tags={data.tags}/>
       </div>
     </div>
   </div>

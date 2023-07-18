@@ -7,6 +7,7 @@ const config = {
 		alias: {
 			$components: './src/components',
 			$helpers: './src/helpers',
+			$data: './src/data'
 		}
 	}
 };
