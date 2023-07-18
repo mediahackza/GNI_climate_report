@@ -12,6 +12,8 @@
     let country_tags = [];
     let url = '';
 
+    $: desc_string = "this show the availability of data for each country by each tag."
+
     const navigate = (tags, countries, regions, subregions) => {
 
 
@@ -52,6 +54,10 @@
 
 </script>
 
+<div class="description-box">
+    {desc_string}
+</div>
+
 <table>
     <thead>
         <tr>
@@ -87,6 +93,16 @@
     table {
         margin: auto;
         width: 80%
+    }
+
+    .description-box {
+        margin: auto;
+        width: 80%;
+        padding: 10px;
+        background-color: #F7F7F7;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
     }
 
     td, th {

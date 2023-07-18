@@ -5,7 +5,6 @@
     export let filter_function;
     export let region;
 
-    console.log("Region data is: ", data)
 
     // let region = Object.keys(data)[0];
 </script>

@@ -27,8 +27,6 @@
     }
   })
 
-  // $: filters = filters;
-  // $: console.log(filters, tag_list)
 
   const out_list = (set) => {
     let string = ''

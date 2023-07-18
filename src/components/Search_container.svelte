@@ -20,7 +20,6 @@
     let search_bar_x;
     let search_bar_y;
 
-    $:console.log(search_bar_x, search_bar_y)
 
         $: search_items.forEach((t, i) => {
             if (i == 0 ) {
@@ -42,7 +41,6 @@
 
     const filter_data = () => {
         if (allow_show_all && search_filter == null) {
-            console.log('show all')
             data = search_items.filter(item => {
                 return item.active == false;
             })
@@ -51,7 +49,6 @@
             return ((item.name.toUpperCase()).startsWith(search_filter.toUpperCase()) || item.name.toUpperCase().includes(search_filter.toUpperCase())) && item.active == false;
         });
         data = data.sort((a,b) => {
-            console.log(a.name, b.name,  a.name.toUpperCase().indexOf(search_filter.toUpperCase()), b.name.toUpperCase().indexOf(search_filter.toUpperCase()))
             return a.name.toUpperCase().indexOf(search_filter.toUpperCase()) - b.name.toUpperCase().indexOf(search_filter.toUpperCase());
         })
         // .sort(a => {

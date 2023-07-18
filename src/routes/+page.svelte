@@ -10,7 +10,6 @@
   import SearchContainer from '$components/Search_container.svelte'
   import { Tag_con } from '$helpers/tags.js'
   export let data
-  console.log('data:', data);
   
   let subjectTags = data.tags.filter((t) => t.type == 'tag')
 
@@ -52,7 +51,6 @@
   let country_count = 0
 
   $: tag_list = tag_list.map((t, i) => {
-    console.log()
     if (i == 0) {
       tag_count = 0
       country_count = 0
@@ -78,9 +76,6 @@
     return tag_count == 0 || country_count == 0
   }
 
-  //   setTimeout(() => {
-  //     console.log(subjectTags)
-  //   }, 3000)
 </script>
 
 <div class="dashboard">
@@ -109,7 +104,7 @@
       <div class="panel-subtitle">
         Select a Country
         <span class="panel-subtitle-sub">(optional)</span>
-        <Map countries={data.countries} tags={data.tags}/>
+        <Map countries={data.countries} bind:tags={tag_list}/>
       </div>
     </div>
   </div>

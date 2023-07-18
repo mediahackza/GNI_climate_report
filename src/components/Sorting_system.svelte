@@ -22,13 +22,11 @@
             return;
         }
         filter_set.add(filter);
-        console.log("active_filters:", active_filters);
         refresh();
     }
 
     const remove_filter = (filter_set, filter) => {
         filter_set.delete(filter);
-        console.log("active_filters:", active_filters);
         refresh();
     }
 </script>

@@ -5,71 +5,99 @@
   let mapElement;
   let map;
 
-  import { africa } from '$data/africa';
-  import { onMount, onDestroy } from 'svelte';
-  import { browser } from '$app/environment'
+  import { codes } from '$helpers/ios_to_counrty.js';
+  import { africa } from "$data/africa";
+  import { onMount, onDestroy } from "svelte";
+  import { browser } from "$app/environment";
+
+  
+
+  const find_tag = (code) => {
+    let name = codes[code];
+    console.log("name:", name)
+    let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
+    return tag;
+  };
 
   onMount(async () => {
-    const leaflet = await import('leaflet');
+    const leaflet = await import("leaflet");
+    let lines;
 
-    map = leaflet.map(mapElement, {
-          doubleClickZoom: false,
-          scrollWheelZoom: false,
-          attributionControl: false,
-          zoomControl:false, 
-          dragging: false,
-          closePopupOnClick: false, 
-          boxZoom: false,
-      }).setView([0, 0],2);
+    
 
-      L.geoJSON(africa, {
-        style: function(feature) {
-          return {
-            color:'black',
-            weight: 1,
-            className: 'front'
-          }
-        },
-        onEachFeature: (feature, layer) => {
-          console.log("layer:", layer);
-          console.log("test")
-          layer.on('mouseover', (e) => {
-            console.log("mouse over")
-          });
-          layer.on('mouseout', (e) => {
-            console.log("mouse out")
-          });
-          layer.on('click', (e) => {
-            console.log("click")
+    map = leaflet
+      .map(mapElement, {
+        doubleClickZoom: false,
+        scrollWheelZoom: false,
+        attributionControl: false,
+        zoomControl: false,
+        dragging: false,
+        closePopupOnClick: false,
+        boxZoom: false,
+      })
+      .setView([0, 0], 2);
+
+    lines = L.geoJSON(africa, {
+      style: function (feature) {
+        return {
+          color: "black",
+          weight: 1,
+          className: "front",
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        
+        
+        // layer.on("mouseover", (e) => {
+        //   layer.setStyle({
+        //     color: '#02C1CB',
+        //   })
+        // });
+        // layer.on("mouseout", (e) => {
+        //   layer.setStyle({
+        //     color: 'black',
+        //   })
+        // });
+        layer.on("click", (e) => {
+          find_tag(feature.properties.iso_a2).set_active(true);
+          tags = tags;
+        });
+      },
+    }).addTo(map);
+
+
+
+    $: if (tags) {
+      console.log("running this thing")
+      lines.eachLayer((layer) => {
+        let feature = layer.feature;
+        if (feature.properties.iso_a2 == 'EH' || feature.properties.iso_a2 == '-99' || feature.properties.iso_a2 == 'SZ') {
+          return;
+        }
+
+        if ((find_tag(feature.properties.iso_a2)).active) {
+          console.log(feature.properties.name, "this layer is active")
+          layer.setStyle({
+            color: '#02C1CB'
+          })
+        } else {
+          console.log(feature.properties.name, "this layer is not active")
+          layer.setStyle({
+            color: 'black'
           })
         }
-      }).addTo(map);
+      })
+  }
   });
 
   onDestroy(async () => {
     if (map) {
       map.remove();
     }
-  })
+  });
 </script>
-<div id="map" class='chart' bind:this={mapElement} >
 
-</div>
-
-<style>
-  .chart {
-    width: 100%;
-    height: 50vh;
-    /* border: 1px solid red; */
-    margin: 0px;
-  }
-  :global(.front) {
-    z-index: 1000
-  }
-  :global(.front:hover) {
-    color: white
-  }
-</style>
+<div id="map" class="chart" bind:this={mapElement} />
 
 <!-- <svg
   width="174"
@@ -420,3 +448,21 @@
     width: 100%;
   }
 </style> -->
+
+<style>
+  .chart {
+    width: 100%;
+    height: 50vh;
+    /* border: 1px solid red; */
+    margin: 0px;
+  }
+  :global(.front) {
+    z-index: 1000;
+  }
+  :global(.front:hover) {
+    color: white;
+  }
+  :global(svg) {
+    pointer-events: all;
+  }
+</style>
