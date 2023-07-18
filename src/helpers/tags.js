@@ -14,7 +14,7 @@ const tag = {
             this.children.push(child_tag);
         }
     },
-    toggleActiveZ(){
+    toggleActive(){
         this.active = !this.active;
     },
     set_active(value) {

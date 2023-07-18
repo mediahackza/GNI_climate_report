@@ -14,7 +14,7 @@
 
   const find_tag = (code) => {
     let name = codes[code];
-    console.log("name:", name)
+    // console.log("name:", name)
     let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
     return tag;
   };
@@ -22,6 +22,29 @@
   onMount(async () => {
     const leaflet = await import("leaflet");
     let lines;
+
+    const check_new = () => {
+      console.log("running this thing")
+      lines.eachLayer((layer) => {
+        let feature = layer.feature;
+        
+        if (feature.properties.iso_a2 == 'EH' || feature.properties.iso_a2 == '-99' || feature.properties.iso_a2 == 'SZ') {
+          return;
+        }
+        console.log(feature, find_tag(feature.properties.iso_a2).active)
+        if ((find_tag(feature.properties.iso_a2)).active) {
+          // console.log(feature.properties.name, "this layer is active")
+          layer.setStyle({
+            color: '#02C1CB',
+          })
+        } else {
+          // console.log(feature.properties.name, "this layer is not active")
+          layer.setStyle({
+            color: 'black'
+          })
+        }
+      })
+    }
 
     
 
@@ -59,35 +82,15 @@
         //   })
         // });
         layer.on("click", (e) => {
-          find_tag(feature.properties.iso_a2).set_active(true);
+          find_tag(feature.properties.iso_a2).toggleActive();
           tags = tags;
+          check_new()
         });
       },
     }).addTo(map);
 
+    check_new();
 
-
-    $: if (tags) {
-      console.log("running this thing")
-      lines.eachLayer((layer) => {
-        let feature = layer.feature;
-        if (feature.properties.iso_a2 == 'EH' || feature.properties.iso_a2 == '-99' || feature.properties.iso_a2 == 'SZ') {
-          return;
-        }
-
-        if ((find_tag(feature.properties.iso_a2)).active) {
-          console.log(feature.properties.name, "this layer is active")
-          layer.setStyle({
-            color: '#02C1CB'
-          })
-        } else {
-          console.log(feature.properties.name, "this layer is not active")
-          layer.setStyle({
-            color: 'black'
-          })
-        }
-      })
-  }
   });
 
   onDestroy(async () => {
