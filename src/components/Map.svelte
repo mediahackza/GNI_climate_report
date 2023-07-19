@@ -115,11 +115,9 @@
     })
     .addTo(map);
 
-    map.fintBounds(lines.getBounds())
 
     check_new();
 
-    L.map.invalidateSize()
   });
 
   onDestroy(async () => {
@@ -482,7 +480,10 @@
 </style> -->
 
 <style>
-   :global(g:focus) {
+  :global(.leaflet-control-container) {
+    display: none;
+  }
+   :global(g:focus) { 
   outline: none;
 }
 
@@ -493,13 +494,14 @@
   .container {
     height: 50vh;
     width: 100%;
-    border: 1px solid blue;
+    /* border: 1px solid blue; */
   }
   .chart {
     width: 100%;
     height: 100%;
-    border: 1px solid red;
+    /* border: 1px solid red; */
     margin: 0px;
+    background: #EEEEEE
   }
   :global(.front) {
     z-index: 1000;
