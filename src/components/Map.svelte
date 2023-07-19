@@ -5,12 +5,11 @@
   let mapElement;
   let map;
 
-  import { codes } from '$helpers/ios_to_counrty.js';
+  import { codes } from "$helpers/ios_to_counrty.js";
   import { africa } from "$data/africa";
   import { onMount, onDestroy } from "svelte";
   import { browser } from "$app/environment";
-
-  
+  import 'leaflet/dist/leaflet.css'
 
   const find_tag = (code) => {
     let name = codes[code];
@@ -24,41 +23,43 @@
     let lines;
 
     const check_new = () => {
-      console.log("running this thing")
+      console.log("running this thing");
       lines.eachLayer((layer) => {
         let feature = layer.feature;
-        
-        if (feature.properties.iso_a2 == 'EH' || feature.properties.iso_a2 == '-99' || feature.properties.iso_a2 == 'SZ') {
+
+        if (
+          feature.properties.iso_a2 == "EH" ||
+          feature.properties.iso_a2 == "-99" ||
+          feature.properties.iso_a2 == "SZ"
+        ) {
           return;
         }
-        console.log(feature, find_tag(feature.properties.iso_a2).active)
-        if ((find_tag(feature.properties.iso_a2)).active) {
+        console.log(feature, find_tag(feature.properties.iso_a2).active);
+        if (find_tag(feature.properties.iso_a2).active) {
           // console.log(feature.properties.name, "this layer is active")
           layer.setStyle({
-            color: '#02C1CB',
-          })
+            color: "#02C1CB",
+          });
         } else {
           // console.log(feature.properties.name, "this layer is not active")
           layer.setStyle({
-            color: 'black'
-          })
+            color: "black",
+          });
         }
-      })
-    }
-
-    
+      });
+    };
 
     map = leaflet
       .map(mapElement, {
         doubleClickZoom: false,
         scrollWheelZoom: false,
-        attributionControl: false,
+        // attributionControl: false,
         zoomControl: false,
         dragging: false,
-        closePopupOnClick: false,
         boxZoom: false,
+        zoomSnap: 0.1,
       })
-      .setView([0, 0], 2);
+      .setView([5, 15], 2.5);
 
     lines = L.geoJSON(africa, {
       style: function (feature) {
@@ -68,9 +69,25 @@
           className: "front",
         };
       },
+      pointToLayer: (feature, latlng) => {
+        return L.marker(latlng)
+        // return L.marker(latlng).bindTooltip(feature.properties.name)
+      },
       onEachFeature: (feature, layer) => {
-        
-        
+        console.log(layer, layer.getBounds().getCenter())
+        // layer.bindPopup(feature.properties.name, {
+        //   className: 'tool-tip'
+        // });
+          // cons
+        // L.tooltip(, {
+        //   content: "this is a test",
+        //   permanent: true,
+        //   opacity: 1,
+        // }).addTo(map);
+
+        // console.log()
+
+        layer.bindTooltip(feature.properties.name);
         // layer.on("mouseover", (e) => {
         //   layer.setStyle({
         //     color: '#02C1CB',
@@ -84,13 +101,25 @@
         layer.on("click", (e) => {
           find_tag(feature.properties.iso_a2).toggleActive();
           tags = tags;
-          check_new()
+          check_new();
         });
+
+        // layer.on("mouseover", () => {
+        //   layer.openPopup();
+        // });
+
+        // layer.on("mouseout", () => {
+        //   l.closePopup();
+        // });
       },
-    }).addTo(map);
+    })
+    .addTo(map);
+
+    map.fintBounds(lines.getBounds())
 
     check_new();
 
+    L.map.invalidateSize()
   });
 
   onDestroy(async () => {
@@ -99,9 +128,9 @@
     }
   });
 </script>
-
+<div class="container">
 <div id="map" class="chart" bind:this={mapElement} />
-
+</div>
 <!-- <svg
   width="174"
   height="197"
@@ -453,10 +482,23 @@
 </style> -->
 
 <style>
+   :global(g:focus) {
+  outline: none;
+}
+
+ :global(path:focus) {
+  outline: none;
+}
+
+  .container {
+    height: 50vh;
+    width: 100%;
+    border: 1px solid blue;
+  }
   .chart {
     width: 100%;
-    height: 50vh;
-    /* border: 1px solid red; */
+    height: 100%;
+    border: 1px solid red;
     margin: 0px;
   }
   :global(.front) {
@@ -468,4 +510,16 @@
   :global(svg) {
     pointer-events: all;
   }
+  :global(.leaflet-popup) {
+        transform: none !important;
+        position: absolute;
+        top: 600px !important;
+        left: 20px !important;
+        border: 1px solid red;
+    }
+
+    :global(.tool-tip) {
+      position: absolute;
+      border: 1px solid red;
+    }
 </style>
