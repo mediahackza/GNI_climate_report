@@ -1,5 +1,8 @@
 <script>
   export let tag
+  export let refresh;
+
+
 </script>
 
 <div class="container {tag.active ? '' : 'inactive'} {tag.type}">
@@ -14,7 +17,8 @@
   <svg
     on:click={() => {
       tag.set_active(false)
-      tag = tag
+      tag = tag;
+      refresh();
     }}
     xmlns="http://www.w3.org/2000/svg"
     width="20"

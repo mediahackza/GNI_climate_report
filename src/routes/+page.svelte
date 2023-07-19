@@ -76,6 +76,11 @@
     return tag_count == 0 || country_count == 0
   }
 
+  const refresh = () => {
+    tag_list = tag_list;
+    console.log("Refreshed")
+  }
+
 </script>
 
 <div class="dashboard">
@@ -109,7 +114,7 @@
     </div>
   </div>
   <div class="panel panel-right">
-    <SearchBar bind:search_items={tag_list} />
+    <SearchBar bind:search_items={tag_list} {refresh}/>
 
     <TagContainer bind:tag_list />
 

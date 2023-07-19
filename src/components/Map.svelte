@@ -4,25 +4,9 @@
 
   let mapElement;
   let map;
+  let lines = false;
 
-  import { codes } from "$helpers/ios_to_counrty.js";
-  import { africa } from "$data/africa";
-  import { onMount, onDestroy } from "svelte";
-  import { browser } from "$app/environment";
-  import 'leaflet/dist/leaflet.css'
-
-  const find_tag = (code) => {
-    let name = codes[code];
-    // console.log("name:", name)
-    let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
-    return tag;
-  };
-
-  onMount(async () => {
-    const leaflet = await import("leaflet");
-    let lines;
-
-    const check_new = () => {
+  const check_new = () => {
       console.log("running this thing");
       lines.eachLayer((layer) => {
         let feature = layer.feature;
@@ -49,6 +33,32 @@
       });
     };
 
+  $: if(tags && lines) {
+    console.log("I sense that tags has changed");
+    check_new();
+  }
+
+  import { codes } from "$helpers/ios_to_counrty.js";
+  import { africa } from "$data/africa";
+  import { onMount, onDestroy } from "svelte";
+  import { browser } from "$app/environment";
+  import 'leaflet/dist/leaflet.css'
+
+  const find_tag = (code) => {
+    let name = codes[code];
+    // console.log("name:", name)
+    let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
+    return tag;
+  };
+
+  onMount(async () => {
+    const leaflet = await import("leaflet");
+    $: if (tags) {
+      console.log("tags has changed");
+    }
+
+    
+
     map = leaflet
       .map(mapElement, {
         doubleClickZoom: false,
@@ -59,7 +69,7 @@
         boxZoom: false,
         zoomSnap: 0.1,
       })
-      .setView([5, 15], 2.5);
+      .setView([-10, 17.5], 2.5);
 
     lines = L.geoJSON(africa, {
       style: function (feature) {
@@ -117,8 +127,12 @@
 
 
     check_new();
-
+    $: if (tags && map) {
+      check_new();
+    }
   });
+
+  
 
   onDestroy(async () => {
     if (map) {
