@@ -5,7 +5,7 @@
 
 </script>
 
-<div class="container {tag.active ? '' : 'inactive'} {tag.type}">
+<div class="container tag {tag.active ? '' : 'inactive'} {tag.type}">
   <!-- <div class="type">
         {tag.type.toUpperCase()}
     </div> -->
@@ -37,19 +37,7 @@
 </div>
 
 <style>
-  .country {
-    background-color: dodgerblue;
-    color: white;
-  }
-
-  .region {
-    background-color: dodgerblue;
-    color: white;
-  }
-  .subregion {
-    background-color: dodgerblue;
-    color: white;
-  }
+  
   .inactive {
     display: none;
   }
