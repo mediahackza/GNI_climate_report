@@ -6,6 +6,10 @@
   let map;
   let lines = false;
 
+  let width = 1;
+
+  $: console.log(width)
+
   const check_new = () => {
       console.log("running this thing");
       lines.eachLayer((layer) => {
@@ -67,9 +71,9 @@
         zoomControl: false,
         dragging: false,
         boxZoom: false,
-        zoomSnap: 0.1,
+        zoomSnap: 0.01,
       })
-      .setView([-10, 17.5], 2.5);
+      .setView([-10, 17.5], (width/100));
 
     lines = L.geoJSON(africa, {
       style: function (feature) {
@@ -114,6 +118,10 @@
           check_new();
         });
 
+        map.on('mouseover', () => {
+          console.log("mouse over", map.getBounds());
+        })
+
         // layer.on("mouseover", () => {
         //   layer.openPopup();
         // });
@@ -124,6 +132,9 @@
       },
     })
     .addTo(map);
+    map.fitBounds([[38, 52], [-38, -20]])
+    map.setZoom()
+    // map.setView([-20, 20])
 
 
     check_new();
@@ -139,10 +150,64 @@
       map.remove();
     }
   });
+
+  const adjust_map = () => {
+    // map.setMinZoom( map.getBoundsZoom([[-180,85],[180,85]], true) );
+    map.fitBounds([[38, 52], [-38, -20]])
+  }
 </script>
-<div class="container">
+<div class="container" bind:clientWidth={width}>
 <div id="map" class="chart" bind:this={mapElement} />
 </div>
+
+<svelte:window on:resize={adjust_map}/>
+
+<style>
+  :global(.leaflet-control-container) {
+    display: none;
+  }
+   :global(g:focus) { 
+  outline: none;
+}
+
+ :global(path:focus) {
+  outline: none;
+}
+
+  .container {
+    height: 50vh;
+    width: 100%;
+    /* border: 1px solid blue; */
+  }
+  .chart {
+    width: 100%;
+    height: 100%;
+    /* border: 1px solid red; */
+    margin: 0px;
+    background: #EEEEEE
+  }
+  :global(.front) {
+    z-index: 1000;
+  }
+  :global(.front:hover) {
+    color: white;
+  }
+  :global(svg) {
+    pointer-events: all;
+  }
+  :global(.leaflet-popup) {
+        transform: none !important;
+        position: absolute;
+        top: 600px !important;
+        left: 20px !important;
+        border: 1px solid red;
+    }
+
+    :global(.tool-tip) {
+      position: absolute;
+      border: 1px solid red;
+    }
+</style>
 <!-- <svg
   width="174"
   height="197"
@@ -493,49 +558,4 @@
   }
 </style> -->
 
-<style>
-  :global(.leaflet-control-container) {
-    display: none;
-  }
-   :global(g:focus) { 
-  outline: none;
-}
 
- :global(path:focus) {
-  outline: none;
-}
-
-  .container {
-    height: 50vh;
-    width: 100%;
-    /* border: 1px solid blue; */
-  }
-  .chart {
-    width: 100%;
-    height: 100%;
-    /* border: 1px solid red; */
-    margin: 0px;
-    background: #EEEEEE
-  }
-  :global(.front) {
-    z-index: 1000;
-  }
-  :global(.front:hover) {
-    color: white;
-  }
-  :global(svg) {
-    pointer-events: all;
-  }
-  :global(.leaflet-popup) {
-        transform: none !important;
-        position: absolute;
-        top: 600px !important;
-        left: 20px !important;
-        border: 1px solid red;
-    }
-
-    :global(.tool-tip) {
-      position: absolute;
-      border: 1px solid red;
-    }
-</style>
