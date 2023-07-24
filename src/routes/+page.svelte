@@ -11,6 +11,8 @@
   import { Tag_con } from '$helpers/tags.js'
   export let data
   
+  let map_type = 'country';
+
   let subjectTags = data.tags.filter((t) => t.type == 'tag')
 
   let region_index = {}
@@ -107,9 +109,12 @@
         {/each}
       </div>
       <div class="panel-subtitle">
-        Select a Country
+        Select a <select bind:value={map_type}>
+          <option value='country'>Country</option>
+          <option value='region' >Region</option>
+        </select>
         <span class="panel-subtitle-sub">(optional)</span>
-        <Map countries={data.countries} bind:tags={tag_list}/>
+        <Map countries={data.countries} bind:tags={tag_list} bind:type={map_type}/>
       </div>
     </div>
   </div>

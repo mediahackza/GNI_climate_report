@@ -1,6 +1,7 @@
 <script>
   export let countries;
   export let tags;
+  export let type = 'country';
 
   let mapElement;
   let map;
@@ -12,8 +13,20 @@
 
   const check_new = () => {
       console.log("running this thing");
+      
+
       lines.eachLayer((layer) => {
         let feature = layer.feature;
+
+        layer.unbindTooltip
+      switch(type) {
+          case ("country"):
+            layer.bindTooltip(feature.properties.name);
+            break;
+          case ("region"):
+            layer.bindTooltip(feature.properties.subregion);
+            break; 
+        }
 
         if (
           feature.properties.iso_a2 == "EH" ||
@@ -25,13 +38,16 @@
         console.log(feature, find_tag(feature.properties.iso_a2).active);
         if (find_tag(feature.properties.iso_a2).active) {
           // console.log(feature.properties.name, "this layer is active")
+          feature.style = {
+            fillColor: '#02C1CB'
+          }
           layer.setStyle({
-            color: "#02C1CB",
+            fillColor: "#02C1CB",
           });
         } else {
           // console.log(feature.properties.name, "this layer is not active")
           layer.setStyle({
-            color: "black",
+            fillColor: "black",
           });
         }
       });
@@ -47,11 +63,13 @@
   import { onMount, onDestroy } from "svelte";
   import { browser } from "$app/environment";
   import 'leaflet/dist/leaflet.css'
+    import Region from "./Region.svelte";
 
   const find_tag = (code) => {
     let name = codes[code];
     // console.log("name:", name)
     let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
+    console.log("clicked tag:" , tag);
     return tag;
   };
 
@@ -88,7 +106,10 @@
         // return L.marker(latlng).bindTooltip(feature.properties.name)
       },
       onEachFeature: (feature, layer) => {
-        console.log(layer, layer.getBounds().getCenter())
+        console.log(layer, layer.getBounds().getCenter());
+        feature.style = {
+          fillColor: 'black'
+        }
         // layer.bindPopup(feature.properties.name, {
         //   className: 'tool-tip'
         // });
@@ -100,8 +121,15 @@
         // }).addTo(map);
 
         // console.log()
+        
+        
 
-        layer.bindTooltip(feature.properties.name);
+        // "Middle Africa"
+        // "Eastern Africa"
+        // "Western Africa"
+        // "Southern Africa"
+        // "Northern Africa"
+
         // layer.on("mouseover", (e) => {
         //   layer.setStyle({
         //     color: '#02C1CB',
@@ -113,13 +141,108 @@
         //   })
         // });
         layer.on("click", (e) => {
-          find_tag(feature.properties.iso_a2).toggleActive();
+          let tag = find_tag(feature.properties.iso_a2);
+      
+          if (tag.toggleActive()) {
+            feature.style = {
+              fillColor: '#02C1CB'
+            };
+          } else {
+            feature.style = {
+              fillColor: 'black'
+            };
+          }
+          
           tags = tags;
           check_new();
         });
 
-        map.on('mouseover', () => {
-          console.log("mouse over", map.getBounds());
+        layer.on('mouseover', () => {
+          // console.log('mouse over');
+          // console.log(feature.style);
+
+          // console.log(find_tag(feature.properties.iso_a2).parent
+          if (type == 'region') {
+            let region_tag = feature.properties.subregion;
+          switch (region_tag) {
+            case "Northern Africa":
+                region_tag = "north"
+                break;
+              case "Southern Africa":
+                region_tag = "south";
+                break;
+              case "Western Africa":
+                region_tag = "west";
+                break;
+              case "Eastern Africa":
+                region_tag = "east";
+                break;
+              case "Middle Africa":
+                region_tag = "central";
+                break;
+          }
+
+          lines.eachLayer(l => {
+            console.log("layer :", l);
+            console.log("iso: ", l.feature.properties.iso_a2, typeof l.feature.properties.iso_a2);
+            if ((l.feature.properties.iso_a2.length ==2)) {
+            let temp_tag = find_tag(l.feature.properties.iso_a2);
+
+            if (temp_tag != undefined && temp_tag.parent != undefined && temp_tag.parent.name == region_tag ) {
+              l.setStyle({
+                fillColor: 'red'
+              })
+            }
+            }
+          })
+          }
+          
+
+          layer.setStyle({
+            fillColor: 'red'
+          })
+        });
+
+        layer.on('mouseout', () => {
+          console.log('mouseout');
+
+          if (type == 'region') {
+            let region_tag = feature.properties.subregion;
+          switch (region_tag) {
+            case "Northern Africa":
+                region_tag = "north"
+                break;
+              case "Southern Africa":
+                region_tag = "south";
+                break;
+              case "Western Africa":
+                region_tag = "west";
+                break;
+              case "Eastern Africa":
+                region_tag = "east";
+                break;
+              case "Middle Africa":
+                region_tag = "central";
+                break;
+          }
+
+          lines.eachLayer(l => {
+            console.log("layer :", l);
+            console.log("iso: ", l.feature.properties.iso_a2, typeof l.feature.properties.iso_a2);
+            if ((l.feature.properties.iso_a2.length ==2)) {
+            let temp_tag = find_tag(l.feature.properties.iso_a2);
+
+            if (temp_tag != undefined && temp_tag.parent != undefined && temp_tag.parent.name == region_tag ) {
+              l.setStyle({
+                fillColor: 'black'
+              })
+            }
+            }
+          })
+          }
+          
+
+          layer.setStyle(feature.style);
         })
 
         // layer.on("mouseover", () => {
@@ -135,7 +258,6 @@
     map.fitBounds([[38, 52], [-38, -20]])
     map.setZoom()
     // map.setView([-20, 20])
-
 
     check_new();
     $: if (tags && map) {
