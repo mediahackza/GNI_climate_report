@@ -28,7 +28,7 @@ export async function load({ locals, fetch }) {
             region: el.region_1,
             subregion: el.region_2,
             tags: new Set(),
-            reports: new Set(),
+            reports: new Set()
         }
     });
 
@@ -44,7 +44,12 @@ export async function load({ locals, fetch }) {
                     return a; 
                 }            
             })),
-            tags: new Set(el.tags.split(",").map(a => a.trim()))
+            tags: new Set(el.tags.split(",").map(a => a.trim())),
+            publiher: el.publisher,
+            blurb: el.blurb,
+            period_covered: el.period_covered,
+            last_updated: el.last_updated,
+            key: el.key
         }
     });
 
