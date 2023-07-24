@@ -53,19 +53,6 @@
       lines.eachLayer((layer) => {
         let feature = layer.feature;
 
-        layer.unbindTooltip();
-      switch(type) {
-          case ("country"):
-            layer.bindTooltip(feature.properties.name);
-            break;
-          case ("region"):
-            layer.bindTooltip(full_region(feature.region));
-            break; 
-          case ('subregion'):
-            layer.bindTooltip(full_region(feature.subregion));
-            break;
-        }
-
         if (
           feature.properties.iso_a2 == "EH" ||
           feature.properties.iso_a2 == "-99" ||
@@ -73,6 +60,17 @@
         ) {
           return;
         }
+
+        if ((find_tag(layer.feature.properties.iso_a2)).active) {
+          feature.style = {
+            fillColor: '#02C1CB'
+          }
+        } else {
+          feature.style = {
+            fillColor: 'black'
+          }
+        }
+
         layer.setStyle(layer.feature.style)
       });
     };
