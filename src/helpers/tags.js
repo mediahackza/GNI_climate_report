@@ -3,6 +3,7 @@ const tag = {
     name: 'emissons',
     active: true,
     children: [],
+    parent: null, 
     hasChild(child_name) {
 
         return this.children.some(a => {
@@ -12,6 +13,7 @@ const tag = {
     addChild(child_tag) {
         if (!this.hasChild(child_tag.name)) {
             this.children.push(child_tag);
+            child_tag.parent = this;
         }
     },
     toggleActive(){
