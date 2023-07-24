@@ -11,6 +11,8 @@
 
   let width = 1;
 
+  
+
   const full_region = (region) => {
     let region_name = '';
     switch (region){
@@ -34,6 +36,10 @@
         break;
       case 'na':
         region_name = "Northern Africa";
+        break;
+
+      default:
+        region_name = region;
         break;
     }
 
@@ -73,6 +79,19 @@
 
   $: if(tags && lines) {
     check_new();
+  }
+
+  $: if (type == "country" && lines) {
+    lines.eachLayer(l => {
+      l.unbindTooltip();
+      l.bindTooltip(l.feature.properties.name)
+    })
+  } else if ((type == 'region' || type == 'subregion') && lines) {
+    lines.eachLayer(l => {
+      console.log(l.feature.subregion)
+      l.unbindTooltip();
+      l.bindTooltip(full_region(l.feature[type]))
+    })
   }
 
   import { codes } from "$helpers/ios_to_counrty.js";
@@ -245,7 +264,6 @@
           })
           }
           
-
           layer.setStyle(feature.style);
         })
 
