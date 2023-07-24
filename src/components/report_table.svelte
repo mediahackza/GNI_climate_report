@@ -1,6 +1,7 @@
 <script>
   export let tag_list
   export let table_data
+  export let warning = true;
 
   let filters = {
     country: new Set(),
@@ -75,9 +76,10 @@
 </script>
 
 <div class="container">
-  {#if data.length == 0}
-    <div class="waring">no reports to show</div>
-  {:else}
+  {#if data.length == 0 && warning}
+    <div class="description-box">no reports {#if filters.tag.size > 0} on {out_list(filters.tag)}{/if} {#if filters.country.size > 0} in {out_list(filters.country)}{/if} to show</div>
+  {/if}
+  {#if data.length > 0}
     <div class="heading">
       Reports
       {#if filters.tag.size > 0} on {out_list(filters.tag)}{/if}
@@ -146,4 +148,15 @@
   table {
     margin: 10px auto;
   }
+
+  .description-box {
+        margin: auto;
+        width: 80%;
+        padding: 10px;
+        background-color: #F7F7F7;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
 </style>

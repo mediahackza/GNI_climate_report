@@ -26,12 +26,12 @@
         if (find_tag(feature.properties.iso_a2).active) {
           // console.log(feature.properties.name, "this layer is active")
           layer.setStyle({
-            color: "#02C1CB",
+            fillColor: "#02C1CB",
           });
         } else {
           // console.log(feature.properties.name, "this layer is not active")
           layer.setStyle({
-            color: "black",
+            fillColor: "black",
           });
         }
       });

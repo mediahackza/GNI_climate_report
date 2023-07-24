@@ -119,11 +119,11 @@
     <TagContainer bind:tag_list />
 
     {#if tag_count != 0 && country_count != 0}
-      <DataTable bind:active_tags={tag_list} countries={data.countries} />
+      <DataTable bind:active_tags={tag_list} countries={data.countries}  />
     {/if}
 
     {#if tag_count != 0 || country_count != 0}
-      <ReportTable bind:tag_list table_data={data.data} />
+      <ReportTable bind:tag_list table_data={data.data} warning={true} />
     {/if}
   </div>
 </div>
