@@ -1,6 +1,9 @@
 <script>
   export let countries;
   export let tags;
+  export let type = 'country';
+
+  console.log(tags)
 
   let mapElement;
   let map;
@@ -8,12 +11,57 @@
 
   let width = 1;
 
-  $: console.log(width)
+  const full_region = (region) => {
+    let region_name = '';
+    switch (region){
+      case "north":
+        region_name = "Northern Africa";
+        break;
+      case "south":
+        region_name = "Southern Africa";
+        break;
+      case "west":
+        region_name = "Western Africa";
+        break;
+      case "east":
+        region_name = "Eastern Africa";
+        break;
+      case "central":
+        region_name = "Central Africa";
+        break;
+      case 'ssa':
+        region_name = "Sub-Saharan Africa";
+        break;
+      case 'na':
+        region_name = "Northern Africa";
+        break;
+    }
+
+    return region_name;
+  }
+
+
 
   const check_new = () => {
-      console.log("running this thing");
+      
+      if (!lines) {
+        return;
+      }
       lines.eachLayer((layer) => {
         let feature = layer.feature;
+
+        layer.unbindTooltip();
+      switch(type) {
+          case ("country"):
+            layer.bindTooltip(feature.properties.name);
+            break;
+          case ("region"):
+            layer.bindTooltip(full_region(feature.region));
+            break; 
+          case ('subregion'):
+            layer.bindTooltip(full_region(feature.subregion));
+            break;
+        }
 
         if (
           feature.properties.iso_a2 == "EH" ||
@@ -22,23 +70,11 @@
         ) {
           return;
         }
-        console.log(feature, find_tag(feature.properties.iso_a2).active);
-        if (find_tag(feature.properties.iso_a2).active) {
-          // console.log(feature.properties.name, "this layer is active")
-          layer.setStyle({
-            fillColor: "#02C1CB",
-          });
-        } else {
-          // console.log(feature.properties.name, "this layer is not active")
-          layer.setStyle({
-            fillColor: "black",
-          });
-        }
+        layer.setStyle(layer.feature.style)
       });
     };
 
-  $: if(tags && lines) {
-    console.log("I sense that tags has changed");
+  $: if(tags) {
     check_new();
   }
 
@@ -47,21 +83,21 @@
   import { onMount, onDestroy } from "svelte";
   import { browser } from "$app/environment";
   import 'leaflet/dist/leaflet.css'
+    import Region from "./Region.svelte";
 
   const find_tag = (code) => {
     let name = codes[code];
-    // console.log("name:", name)
     let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
+    return tag;
+  };
+
+  const find_region_tag = (region) => {
+    let tag = tags.find((t) => t.name.toUpperCase() == region.toUpperCase());
     return tag;
   };
 
   onMount(async () => {
     const leaflet = await import("leaflet");
-    $: if (tags) {
-      console.log("tags has changed");
-    }
-
-    
 
     map = leaflet
       .map(mapElement, {
@@ -88,38 +124,139 @@
         // return L.marker(latlng).bindTooltip(feature.properties.name)
       },
       onEachFeature: (feature, layer) => {
-        console.log(layer, layer.getBounds().getCenter())
-        // layer.bindPopup(feature.properties.name, {
-        //   className: 'tool-tip'
-        // });
-          // cons
-        // L.tooltip(, {
-        //   content: "this is a test",
-        //   permanent: true,
-        //   opacity: 1,
-        // }).addTo(map);
 
-        // console.log()
 
-        layer.bindTooltip(feature.properties.name);
-        // layer.on("mouseover", (e) => {
-        //   layer.setStyle({
-        //     color: '#02C1CB',
-        //   })
-        // });
-        // layer.on("mouseout", (e) => {
-        //   layer.setStyle({
-        //     color: 'black',
-        //   })
-        // });
+        feature.style = {
+          fillColor: 'black'
+        }
+
+        console.log(feature.properties.iso_a2)
+        if (feature.properties.iso_a2.length == 2 && feature.properties.iso_a2 != "EH" && feature.properties.iso_a2 != "-99" && feature.properties.iso_a2 != "SZ") {
+          console.log((find_tag(feature.properties.iso_a2)).parent.filter(a => a.type == 'subregion')[0])
+          feature.region = (find_tag(feature.properties.iso_a2)).parent.filter(a => a.type == 'region')[0].name;
+          let sr = (find_tag(feature.properties.iso_a2)).parent.filter(a => a.type == 'subregion')[0];
+          feature.subregion = (sr == undefined) ? undefined : sr.name;
+          console.log(feature)
+        }
+
         layer.on("click", (e) => {
-          find_tag(feature.properties.iso_a2).toggleActive();
+
+          let tag
+          if (type == 'region' || type == 'subregion') {
+            tag = find_region_tag(feature[type]);
+          } 
+
+          if (type == 'country') {
+            tag = find_tag(feature.properties.iso_a2);
+          }
+
+          console.log(tag)
+          
+      
+          if (tag.toggleActive()) {
+            feature.style = {
+                fillColor: '#02C1CB'
+              }
+            lines.eachLayer(l => {
+              
+              if (l.feature[type]!= undefined && l.feature[type] == feature[type]) {
+                l.feature.style ={
+                  fillColor: '#02C1CB'
+                }
+              }
+
+              l.setStyle({
+                fillColor: l.feature.style
+              })
+            })
+          } else {
+            feature.style = {
+              fillColor: 'black'
+            };
+
+            lines.eachLayer(l => {
+              if (l.feature[type] != undefined && l.feature[type] == feature[type]) {
+                l.feature.style ={
+                  fillColor: 'black'
+                }
+              }
+            })
+          }
+          
           tags = tags;
           check_new();
         });
 
-        map.on('mouseover', () => {
-          console.log("mouse over", map.getBounds());
+        layer.on('mouseover', () => {
+          if (type == 'region' || type == 'subregion') {
+            let region_tag = feature[type];
+          // switch (region_tag) {
+          //   case "Northern Africa":
+          //       region_tag = "north"
+          //       break;
+          //     case "Southern Africa":
+          //       region_tag = "south";
+          //       break;
+          //     case "Western Africa":
+          //       region_tag = "west";
+          //       break;
+          //     case "Eastern Africa":
+          //       region_tag = "east";
+          //       break;
+          //     case "Middle Africa":
+          //       region_tag = "central";
+          //       break;
+          // }
+
+          lines.eachLayer(l => {
+            console.log(l.feature[type], region_tag)
+              if (l.feature[type] != undefined && l.feature[type] == region_tag) {
+                  
+                  l.setStyle({
+                    fillColor: 'red'
+                  })
+              }
+          })
+        }
+        layer.setStyle({
+          fillColor: 'red'
+        })
+          
+        });
+
+        layer.on('mouseout', () => {
+
+          if (type == 'region' || type == 'subregion') {
+            let region_tag = feature[type];
+          switch (region_tag) {
+            case "Northern Africa":
+                region_tag = "north"
+                break;
+              case "Southern Africa":
+                region_tag = "south";
+                break;
+              case "Western Africa":
+                region_tag = "west";
+                break;
+              case "Eastern Africa":
+                region_tag = "east";
+                break;
+              case "Middle Africa":
+                region_tag = "central";
+                break;
+          }
+
+          lines.eachLayer(l => {
+            if (l.feature[type] != undefined && l.feature[type] == region_tag) {
+                l.setStyle({
+                  fillColor: 'black'
+                })
+            }
+          })
+          }
+          
+
+          layer.setStyle(feature.style);
         })
 
        
@@ -137,7 +274,6 @@
     map.fitBounds([[38, 52], [-38, -20]])
     map.setZoom()
     // map.setView([-20, 20])
-
 
     check_new();
     $: if (tags && map) {

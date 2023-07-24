@@ -10,7 +10,11 @@
   import SearchContainer from '$components/Search_container.svelte'
   import { Tag_con } from '$helpers/tags.js'
   export let data
+
+  console.log(data);
   
+  let map_type = 'country';
+
   let subjectTags = data.tags.filter((t) => t.type == 'tag')
 
   let region_index = {}
@@ -21,6 +25,8 @@
     return new Tag_con(t.type, t.name)
   })
 
+  console.log(region_index)
+
   tag_list.forEach((t) => {
     if (t.type == 'country') {
       let sb_region
@@ -30,10 +36,8 @@
           sb_region = 'Sub-Saharan Africa'
           break
         case 'na':
-          sb_region = 'Northern Africa'
-          break
-        default:
-          sb_region = data.countries[t.name].subregion
+          sb_region = 'North Africa'
+          break;
       }
 
       if (region_index.hasOwnProperty(sb_region)) {
@@ -42,9 +46,6 @@
 
       tag_list[region_index[data.countries[t.name].region]].addChild(t)
     }
-    // if (t.type == 'country') {
-    //     tag_list[data.countries[t.name].region].addChild(t);
-    // }
   })
 
   let tag_count = 0
@@ -107,9 +108,13 @@
         {/each}
       </div>
       <div class="panel-subtitle">
-        Select a Country
+        Select a <select bind:value={map_type}>
+          <option value='country'>Country</option>
+          <option value='region' >Region</option>
+          <option value='subregion'>Sub-region</option>
+        </select>
         <span class="panel-subtitle-sub">(optional)</span>
-        <Map countries={data.countries} bind:tags={tag_list}/>
+        <Map countries={data.countries} bind:tags={tag_list} bind:type={map_type}/>
       </div>
     </div>
   </div>
