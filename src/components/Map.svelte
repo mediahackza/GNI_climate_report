@@ -43,10 +43,7 @@
 
 
   const check_new = () => {
-      
-      if (!lines) {
-        return;
-      }
+     
       lines.eachLayer((layer) => {
         let feature = layer.feature;
 
@@ -74,7 +71,7 @@
       });
     };
 
-  $: if(tags) {
+  $: if(tags && lines) {
     check_new();
   }
 
@@ -144,19 +141,12 @@
           let tag
           if (type == 'region' || type == 'subregion') {
             tag = find_region_tag(feature[type]);
-          } 
 
-          if (type == 'country') {
-            tag = find_tag(feature.properties.iso_a2);
-          }
-
-          console.log(tag)
-          
-      
-          if (tag.toggleActive()) {
+            if (tag.toggleActive()) {
             feature.style = {
                 fillColor: '#02C1CB'
               }
+            
             lines.eachLayer(l => {
               
               if (l.feature[type]!= undefined && l.feature[type] == feature[type]) {
@@ -182,6 +172,26 @@
               }
             })
           }
+          } 
+
+          if (type == 'country') {
+            tag = find_tag(feature.properties.iso_a2);
+
+            if (tag.toggleActive()) {
+              feature.style = {
+                fillColor: '#02C1CB'
+              }
+            } else {
+              feature.style = {
+                fillColor: 'black'
+              }
+            }
+          }
+
+          console.log(tag)
+          
+      
+          
           
           tags = tags;
           check_new();
@@ -190,28 +200,10 @@
         layer.on('mouseover', () => {
           if (type == 'region' || type == 'subregion') {
             let region_tag = feature[type];
-          // switch (region_tag) {
-          //   case "Northern Africa":
-          //       region_tag = "north"
-          //       break;
-          //     case "Southern Africa":
-          //       region_tag = "south";
-          //       break;
-          //     case "Western Africa":
-          //       region_tag = "west";
-          //       break;
-          //     case "Eastern Africa":
-          //       region_tag = "east";
-          //       break;
-          //     case "Middle Africa":
-          //       region_tag = "central";
-          //       break;
-          // }
 
           lines.eachLayer(l => {
             console.log(l.feature[type], region_tag)
               if (l.feature[type] != undefined && l.feature[type] == region_tag) {
-                  
                   l.setStyle({
                     fillColor: 'red'
                   })
@@ -248,9 +240,7 @@
 
           lines.eachLayer(l => {
             if (l.feature[type] != undefined && l.feature[type] == region_tag) {
-                l.setStyle({
-                  fillColor: 'black'
-                })
+                l.setStyle(feature.style)
             }
           })
           }
