@@ -112,6 +112,7 @@
                     class="tag"
                     class:has_tag={filters.tag.has(tag)}
                     class:no_tag={!filters.tag.has(tag)}
+                    
                   >
                     {tag}
                   </span>

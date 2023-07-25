@@ -45,7 +45,7 @@ export async function load({ locals, fetch }) {
                 }            
             })),
             tags: new Set(el.tags.split(",").map(a => a.trim())),
-            publiher: el.publisher,
+            publisher: el.publisher,
             blurb: el.blurb,
             period_covered: el.period_covered,
             last_updated: el.last_updated,
