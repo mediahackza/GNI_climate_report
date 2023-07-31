@@ -1,267 +1,206 @@
 <script>
+  import Map from '$components/Map.svelte'
+  import { goto } from '$app/navigation'
+  import Sorting from '$components/Sorting_system.svelte'
+  import Tag from '$components/Tag.svelte'
+  import TagContainer from '$components/Tag_container.svelte'
+  import SearchBar from '$components/Search_container.svelte'
+  import DataTable from '$components/data_Table.svelte'
+  import ReportTable from '$components/report_table.svelte'
+  import SearchContainer from '$components/Search_container.svelte'
+  import { Tag_con } from '$helpers/tags.js'
+  export let data
 
-    export let data;
-    // console.log(data);
+  console.log(data)
 
-    let tags = data.tags;
-    console.log(tags)
-    let d = data.data;
-    let countries = data.countries;
+  let map_type = 'country'
 
-    let show_country_column = false;
+  let subjectTags = data.tags.filter((t) => t.type == 'tag')
 
-    
-    const check_country = (item) => {
-        let ret_value = false;
-        countries.forEach(a => {
-                if (a.active && item[`${a.country}`] == 'yes') ret_value = true;
-        })
-        
-        return ret_value;
+  let region_index = {}
+  let tag_list = data.tags.map((t, i) => {
+    if (t.type == 'region' || t.type == 'subregion') {
+      region_index[t.name] = i
+    }
+    return new Tag_con(t.type, t.name)
+  })
+
+  console.log(region_index)
+
+  tag_list.forEach((t) => {
+    if (t.type == 'country') {
+      let sb_region
+
+      switch (data.countries[t.name].subregion) {
+        case 'ssa':
+          sb_region = 'Sub-Saharan Africa'
+          break
+        case 'na':
+          sb_region = 'North Africa'
+          break
+      }
+
+      if (region_index.hasOwnProperty(sb_region)) {
+        tag_list[region_index[sb_region]].addChild(t)
+      }
+
+      tag_list[region_index[data.countries[t.name].region]].addChild(t)
+    }
+  })
+
+  let tag_count = 0
+  let country_count = 0
+
+  $: tag_list = tag_list.map((t, i) => {
+    if (i == 0) {
+      tag_count = 0
+      country_count = 0
+    }
+    if (t.active) {
+      switch (t.type) {
+        case 'tag':
+          tag_count++
+          break
+        case 'country':
+          country_count++
+          break
+      }
     }
 
-    const check_tag = (tag_name) => {
-        let temp = tags.filter(a => a.tag.replaceAll(" ", '') == tag_name.replaceAll(" ", ''));
-        console.log(temp[0]);
+    return t
+  })
 
-        if (temp.length == 0) return false;
-        else return temp[0].active;
-        // return temp[0].active;
+  let table_t = false
+  $: table_t = tag_count > 0 && country_count > 0
 
-    }
+  const table_type = () => {
+    return tag_count == 0 || country_count == 0
+  }
 
-    const check_tags = (item) => {
-        let temp = item.tags;
-        let ret_value = false;
-        let count = 0;
-        temp.forEach(t => {
-            if (tags.find(tag => {
-                let find_value = tag.tag.replaceAll(" ", "");
-                return find_value == t && tag.active
-            })) {
-                count++;
-                ret_value = true;
-            }
-               
-        })
-
-        item.count = count;
-
-        console.log(item);
-
-        return ret_value;
-    }
-
-    d.forEach(a => {
-        check_tags(a);
-    })
-
-    
-    const to_all = (arr, bool) => {
-        arr.forEach(a => a.active = bool);
-        return arr;
-    }
-
-    const arr_all = (arr, bool) => {
-        let ret_val = true;
-        arr.forEach(a => {
-            if (a.active != bool) {
-                ret_val = false;
-                return false;
-            }
-
-            return true;
-        })
-        return ret_val;
-    }
-
-    const resort = (d) => {
-        return d.sort((a, b) => {
-            return b.count - a.count;
-        })
-    }
-
-    d = resort(d);
-
-
+  const refresh = () => {
+    tag_list = tag_list
+    console.log('Refreshed')
+  }
 </script>
 
-<input name="show_country_column" type="checkbox" id="show_country_column" bind:checked={show_country_column} on:change={() => {d = resort(d)}} value="show country column" />
-<label for="show_country_column">show country column</label>
-<div class="title">
-    countries:
-</div>
+<div class="dashboard">
+  <div class="panel panel-left">
+    <div class="panel-inner">
+      <div class="panel-title">African Climate Data Reporter</div>
+      The Africa Climate Data Explorer records climate-related research and reports.
+      The database is searchable by region, country and topic.
 
-
-
-<div class="tag_filter">
-    {#each countries as c}
-        <div class="tag {c.active ? 'active': 'inactive'}" on:click={() => {c.active = !c.active; d = d}}>
-                {c.country}
-        </div>
-    {/each}
-
-    
-
-    {#if !arr_all(countries, true)}
-    <div class="tag inactive" on:click={() => {countries = to_all(countries, true); d = d}}>
-        show all
-    </div>
-    {/if}
-
-    {#if !arr_all(countries, false)}
-    <div class="tag inactive" on:click={() => {countries = to_all(countries, false); d = d}}>
-        clear
-    </div> 
-    {/if}
-    
-</div>
-
-<div class='title'>
-    tags:
-</div>
-<div class="tag_filter" >
-    {#each tags as tag}
-        <div class="tag {tag.active ? 'active': 'inactive'}" on:click={() => {tag.active = !tag.active; d = resort(d)}}>
-                {tag.tag}
-        </div>
-    {/each}
-
-    {#if !arr_all(tags, true)}
-    <div class="tag inactive" on:click={() => {tags = to_all(tags, true); d = resort(d)}}>
-    show all
-    </div>
-    {/if}
-
-    {#if !arr_all(tags, false)}
-    <div class="tag inactive" on:click={() => {tags = to_all(tags, false); d = resort(d)}}>
-        clear
-    </div> 
-    {/if}
-</div>
-
-<table>
-    <thead>
-        <tr>
-            <th>Report</th>
-            <th>Tags</th>
-
-            {#if show_country_column }
-            {#each countries as c}
-            {#if c.active}
-                <th>{c.country}</th>
-            {/if}
-            {/each}
-
-            {/if}
-        </tr>
-    </thead>
-    <tbody>
-        {#each d as item}
-
-            <tr class='{(check_country(item) && check_tags(item)) ? '' : 'hidden'}'>
-                <td><a href="{item.link}" tagret="_blank">{item.report}</a></td>
-                <td style='padding: 10px; flex-wrap: wrap; display: flex'>
-                {#each item.tags as tag} 
-                    <div class=' mini-tag {(check_tag(tag)) ? 'mini-active' : 'mini-inactive'}'>{tag}</div>
-                {/each}
-                </td>
-
-                {#if show_country_column}
-                {#each countries as c}
-                {#if c.active}
-                    <td class="country-tag {(item[`${c.country}`] == 'yes') ? 'active-country': 'inactive-country' }">{item[`${c.country}`]}</td> 
-                {/if}
-                {/each}
-                {/if}
-            </tr>
-            
+      <div class="panel-subtitle">Select a Topic</div>
+      <div class="panel-tags">
+        {#each tag_list
+          .filter((f) => f.type === 'tag')
+          .sort((a, b) => (a.name > b.name ? 1 : -1)) as t}
+          <div
+            on:click={() => {
+              t.set_active(true)
+              tag_list = tag_list
+            }}
+            class="tag"
+          >
+            {t.name}
+          </div>
         {/each}
-    </tbody>   
-</table>
+      </div>
+      <div class="panel-subtitle">
+        Select a <select bind:value={map_type}>
+          <option value="country">Country</option>
+          <option value="region">Region</option>
+          <option value="subregion">Sub-region</option>
+        </select>
+        <span class="panel-subtitle-sub">(optional)</span>
+        <Map
+          countries={data.countries}
+          bind:tags={tag_list}
+          bind:type={map_type}
+        />
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-right">
+    <SearchBar bind:search_items={tag_list} {refresh} />
+
+    <TagContainer bind:tag_list />
+
+    {#if tag_count != 0 && country_count != 0}
+      <DataTable bind:active_tags={tag_list} countries={data.countries} />
+    {/if}
+
+    {#if tag_count != 0 || country_count != 0}
+      <ReportTable bind:tag_list table_data={data.data} warning={true} />
+    {/if}
+  </div>
+</div>
+
+<!-- <SearchBar bind:search_items={tag_list} />
+
+<TagContainer bind:tag_list />
+{#if tag_count != 0 && country_count != 0}
+  <DataTable bind:active_tags={tag_list} countries={data.countries} />
+{/if}
+
+{#if tag_count != 0 || country_count != 0}
+  <ReportTable bind:tag_list table_data={data.data} />
+{/if} -->
 
 <style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+  }
 
-    :global(body) {
-        font-family: 'Roboto', sans-serif;
-    }
-    table {
-        margin: 10px auto;
-        padding: 0;
-        border: 1px solid lightgray;
-        
-    }
+  td,
+  th {
+    border: 1px solid black;
+  }
 
-    .title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin: 10px;
-        text-align: center;
-    }
+  .clickable {
+    cursor: pointer;
+    background-color: #eee;
+  }
 
-    th {
-        background-color: #eee;
-        font-size: 1.2rem;
-        padding: 10px;
-    }
+  .clickable:hover {
+    opacity: 0.5;
+  }
 
-    td {
-        border-bottom: 1px solid #eee;
-    }
-    .tag {
-        padding: 5px;
-        margin: 5px;
-        border-radius: 5px;
-        cursor: pointer;
-        
-    }
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-gap: 20px;
+    width: 100%;
+    height: 100vh;
+  }
+  .panel {
+    font-size: 0.9rem;
+    color: rgb(109, 109, 109);
+    line-height: 1.3;
+  }
+  .panel-inner {
+    padding: 20px;
+  }
 
-    .tag_filter {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .inactive {
-        background-color: #eee;
-    }
-
-    .active {
-        background-color: dodgerblue;
-        color: white;
-    }
-
-    .hidden {
-        background-color: gray;
-        display: none;
-    }
-
-    .country-tag {
-        text-align: center;
-    }
-
-    .active-country {
-        background-color: #B8DBD9;
-    }
-
-    .inactive-country {
-        background-color: #eee;
-    }
-
-    .mini-tag {
-        margin: 2px 5px;
-        border-radius: 5px;
-        padding: 2px;
-        display: flex;
-        background-color: #eee;
-    }
-
-    .mini-active {
-        background-color: #C2E1FF;
-        /* color: white; */
-    }
-
-    .mini-inactive {
-        background-color: #eee
-    }
+  .panel-left {
+    background: #eee;
+  }
+  .panel-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #000;
+  }
+  .panel-tags * {
+    display: inline-block;
+  }
+  .panel-subtitle {
+    margin-top: 20px;
+    padding: 10px 0px;
+    /* border: solid 1px lightgray; */
+    color: #000;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
 </style>

@@ -1,0 +1,705 @@
+<script>
+  export let countries;
+  export let tags;
+  export let type = 'country';
+
+  console.log(tags)
+
+  let mapElement;
+  let map;
+  let lines = false;
+
+  let width = 1;
+
+  
+
+  const full_region = (region) => {
+    let region_name = '';
+    switch (region){
+      case "north":
+        region_name = "Northern Africa";
+        break;
+      case "south":
+        region_name = "Southern Africa";
+        break;
+      case "west":
+        region_name = "Western Africa";
+        break;
+      case "east":
+        region_name = "Eastern Africa";
+        break;
+      case "central":
+        region_name = "Central Africa";
+        break;
+      case 'ssa':
+        region_name = "Sub-Saharan Africa";
+        break;
+      case 'na':
+        region_name = "Northern Africa";
+        break;
+
+      default:
+        region_name = region;
+        break;
+    }
+
+    return region_name;
+  }
+
+
+
+  const check_new = () => {
+     
+      lines.eachLayer((layer) => {
+        let feature = layer.feature;
+
+        if (
+          feature.properties.iso_a2 == "EH" ||
+          feature.properties.iso_a2 == "-99" ||
+          feature.properties.iso_a2 == "SZ"
+        ) {
+          return;
+        }
+
+        if ((find_tag(layer.feature.properties.iso_a2)).active) {
+          feature.style = {
+            fillColor: '#02C1CB'
+          }
+        } else {
+          feature.style = {
+            fillColor: 'black'
+          }
+        }
+
+        layer.setStyle(layer.feature.style)
+      });
+    };
+
+  $: if(tags && lines) {
+    check_new();
+  }
+
+  $: if (type == "country" && lines) {
+    lines.eachLayer(l => {
+      l.unbindTooltip();
+      l.bindTooltip(l.feature.properties.name)
+    })
+  } else if ((type == 'region' || type == 'subregion') && lines) {
+    lines.eachLayer(l => {
+      console.log(l.feature.subregion)
+      l.unbindTooltip();
+      l.bindTooltip(full_region(l.feature[type]))
+    })
+  }
+
+  import { codes } from "$helpers/ios_to_counrty.js";
+  import { africa } from "$data/africa";
+  import { onMount, onDestroy } from "svelte";
+  import { browser } from "$app/environment";
+  import 'leaflet/dist/leaflet.css'
+    import Region from "./Region.svelte";
+
+  const find_tag = (code) => {
+    let name = codes[code];
+    let tag = tags.find((t) => t.name.toUpperCase() == name.toUpperCase());
+    return tag;
+  };
+
+  const find_region_tag = (region) => {
+    let tag = tags.find((t) => t.name.toUpperCase() == region.toUpperCase());
+    return tag;
+  };
+
+  onMount(async () => {
+    const leaflet = await import("leaflet");
+
+    map = leaflet
+      .map(mapElement, {
+        doubleClickZoom: false,
+        scrollWheelZoom: false,
+        // attributionControl: false,
+        zoomControl: false,
+        dragging: false,
+        boxZoom: false,
+        zoomSnap: 0.01,
+      })
+      .setView([-10, 17.5], (width/100));
+
+    lines = L.geoJSON(africa, {
+      style: function (feature) {
+        return {
+          color: "black",
+          weight: 1,
+          className: "front",
+        };
+      },
+      pointToLayer: (feature, latlng) => {
+        return L.marker(latlng)
+        // return L.marker(latlng).bindTooltip(feature.properties.name)
+      },
+      onEachFeature: (feature, layer) => {
+
+
+        feature.style = {
+          fillColor: 'black'
+        }
+
+        console.log(feature.properties.iso_a2)
+        if (feature.properties.iso_a2.length == 2 && feature.properties.iso_a2 != "EH" && feature.properties.iso_a2 != "-99" && feature.properties.iso_a2 != "SZ") {
+          console.log((find_tag(feature.properties.iso_a2)).parent.filter(a => a.type == 'subregion')[0])
+          feature.region = (find_tag(feature.properties.iso_a2)).parent.filter(a => a.type == 'region')[0].name;
+          let sr = (find_tag(feature.properties.iso_a2)).parent.filter(a => a.type == 'subregion')[0];
+          feature.subregion = (sr == undefined) ? undefined : sr.name;
+          console.log(feature)
+        }
+
+        layer.on("click", (e) => {
+
+          let tag
+          if (type == 'region' || type == 'subregion') {
+            tag = find_region_tag(feature[type]);
+
+            if (tag.toggleActive()) {
+            feature.style = {
+                fillColor: '#02C1CB'
+              }
+            
+            lines.eachLayer(l => {
+              
+              if (l.feature[type]!= undefined && l.feature[type] == feature[type]) {
+                l.feature.style ={
+                  fillColor: '#02C1CB'
+                }
+              }
+
+              l.setStyle({
+                fillColor: l.feature.style
+              })
+            })
+          } else {
+            feature.style = {
+              fillColor: 'black'
+            };
+
+            lines.eachLayer(l => {
+              if (l.feature[type] != undefined && l.feature[type] == feature[type]) {
+                l.feature.style ={
+                  fillColor: 'black'
+                }
+              }
+            })
+          }
+          } 
+
+          if (type == 'country') {
+            tag = find_tag(feature.properties.iso_a2);
+
+            if (tag.toggleActive()) {
+              feature.style = {
+                fillColor: '#02C1CB'
+              }
+            } else {
+              feature.style = {
+                fillColor: 'black'
+              }
+            }
+          }
+
+          console.log(tag)
+          
+      
+          
+          
+          tags = tags;
+          check_new();
+        });
+
+        layer.on('mouseover', () => {
+          if (type == 'region' || type == 'subregion') {
+            let region_tag = feature[type];
+
+          lines.eachLayer(l => {
+            console.log(l.feature[type], region_tag)
+              if (l.feature[type] != undefined && l.feature[type] == region_tag) {
+                  l.setStyle({
+                    fillColor: 'red'
+                  })
+              }
+          })
+        }
+        layer.setStyle({
+          fillColor: 'red'
+        })
+          
+        });
+
+        layer.on('mouseout', () => {
+
+          if (type == 'region' || type == 'subregion') {
+            let region_tag = feature[type];
+          switch (region_tag) {
+            case "Northern Africa":
+                region_tag = "north"
+                break;
+              case "Southern Africa":
+                region_tag = "south";
+                break;
+              case "Western Africa":
+                region_tag = "west";
+                break;
+              case "Eastern Africa":
+                region_tag = "east";
+                break;
+              case "Middle Africa":
+                region_tag = "central";
+                break;
+          }
+
+          lines.eachLayer(l => {
+            if (l.feature[type] != undefined && l.feature[type] == region_tag) {
+                l.setStyle(feature.style)
+            }
+          })
+          }
+          
+          layer.setStyle(feature.style);
+        })
+
+       
+
+        // layer.on("mouseover", () => {
+        //   layer.openPopup();
+        // });
+
+        // layer.on("mouseout", () => {
+        //   l.closePopup();
+        // });
+      },
+    })
+    .addTo(map);
+    map.fitBounds([[38, 52], [-38, -20]])
+    map.setZoom()
+    // map.setView([-20, 20])
+
+    check_new();
+    $: if (tags && map) {
+      check_new();
+    }
+  });
+
+  
+
+  onDestroy(async () => {
+    if (map) {
+      map.remove();
+    }
+  });
+
+  const adjust_map = () => {
+    // map.setMinZoom( map.getBoundsZoom([[-180,85],[180,85]], true) );
+    map.fitBounds([[38, 52], [-38, -20]])
+  }
+</script>
+<div class="container" bind:clientWidth={width}>
+<div id="map" class="chart" bind:this={mapElement} />
+</div>
+
+<svelte:window on:resize={adjust_map}/>
+
+<style>
+  :global(.leaflet-control-container) {
+    display: none;
+  }
+   :global(g:focus) { 
+  outline: none;
+}
+
+ :global(path:focus) {
+  outline: none;
+}
+
+  .container {
+    height: 50vh;
+    width: 100%;
+    /* border: 1px solid blue; */
+  }
+  .chart {
+    width: 100%;
+    height: 100%;
+    /* border: 1px solid red; */
+    margin: 0px;
+    background: #EEEEEE
+  }
+  :global(.front) {
+    z-index: 1000;
+  }
+  :global(.front:hover) {
+    color: white;
+  }
+  :global(svg) {
+    pointer-events: all;
+  }
+  :global(.leaflet-popup) {
+        transform: none !important;
+        position: absolute;
+        top: 600px !important;
+        left: 20px !important;
+        border: 1px solid red;
+    }
+
+    :global(.tool-tip) {
+      position: absolute;
+      border: 1px solid red;
+    }
+</style>
+<!-- <svg
+  width="174"
+  height="197"
+  viewBox="0 0 174 197"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g id="Frame 1" clip-path="url(#clip0_1_2)">
+    <rect width="174" height="197" fill="none" />
+    <path
+      on:click={click}
+      id="Somalia"
+      d="M150.907 72.206L154.433 74.609L155.479 74.557L164.236 71.549L165.23 74.755L164.529 77.461L162.636 78.964L157.907 78.662L151.138 74.504L150.907 72.206Z"
+      fill="black"
+    />
+    <g id="ao">
+      <path
+        on:click={click}
+        id="Vector"
+        d="M75.599 116.87L78.547 127.873L78.478 131.351L74.165 135.984L73.518 143.511L90.115 143.658L95.51 145.612L99.96 145.032L97.366 141.781L97.376 132.499L102.477 132.282V128.661L98.335 128.489L97.506 119.914L95.76 119.938L94.817 119.09L93.79 119.144L92.425 121.79H87.17L85.95 120.563L86.313 118.825L84.877 116.724L75.599 116.87Z"
+        fill="black"
+      />
+      <path
+        on:click={click}
+        id="Vector_2"
+        d="M73.81 113.862L75.314 115.815L77.259 113.973L76.688 112.064L76.205 112.029L73.81 113.862Z"
+        fill="black"
+      />
+    </g>
+    <path
+      on:click={click}
+      id="Burkina Faso"
+      d="M42.726 62.905L45.872 62.655L51.032 69.95L46.243 73.563L42.777 72.671L38.117 72.733L37.365 75.463L33.458 75.653L32.387 74.192L33.772 69.75L42.726 62.905Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="bi"
+      d="M116.737 107.794L120.428 107.716L119.469 110.948L118.534 111.76H117.392L116.58 109.573L116.737 107.794Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="bj"
+      d="M49.745 84.697H51.578L51.682 79.493L53.997 76.13L53.893 70.278L51.791 70.226L48.187 73.042L49.691 75.912L49.745 84.697Z"
+      fill="black"
+    />
+
+    <path
+      on:click={click}
+      id="bw"
+      d="M92.793 163.998L94.651 164.568L94.391 169.882L96.302 170.142L100.693 166.183L105.966 166.753L107.365 163.208L114.038 157.113L106.025 147.89L105.921 146.376L105.038 146.116L102.608 148.356L96.298 148.51L95.414 156.376L92.935 156.946L92.793 163.998Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="cd"
+      d="M76.256 116.006L85.168 115.851L86.976 118.418L86.907 120.311L87.572 120.916H91.998L93.269 118.417H95.077L95.811 119.159L98.29 119.09L99.025 127.804L103.312 127.943V128.618L114.833 133.813L115.369 134.825H117.78L117.512 131.177L113.156 129.085L113.425 126.319L115.301 121.927L119.588 121.788L115.905 109.564L115.973 104.369L121.799 95.259L121.867 93.981L120.993 93.504L121.028 91.032L119.966 90.937L118.894 89.571L101.304 88.776L98.078 91.914L92.798 88.439L90.94 89.58L89.592 100.93L86.255 103.505L85.252 105.788L85.431 109.169L79.414 114.087L77.814 113.361L78.03 114.301L76.256 116.006Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="cf"
+      d="M81.685 88.638L85.713 92.994L87.303 90.937L89.835 91.041L90.379 89.035L92.869 87.479L98.038 91.041L101.02 88.085L112.594 88.595L101.858 77.513L103.301 76.616L103.499 74.662L101.061 73.513H97.481L91.715 79.228L91.518 81.579L86.945 81.433L86.799 82.436L83.817 82.131L81.129 87.239L81.685 88.638Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="cg"
+      d="M77.657 95.96L77.605 97.215L81.736 97.319L81.882 108.047L78.105 107.943L75.918 106.24L74.225 107.191L74.147 107.667L75.02 108.09L75.271 110.294L72.937 112.3L73.438 113.357L76.023 111.351H77.267L77.663 112.551L79.307 113.251L84.578 108.791L84.474 105.532L85.573 102.879L88.953 100.372L89.86 91.893L87.458 91.902L84.675 95.714L77.657 95.96Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ci"
+      d="M26.717 90.971L30.414 88.354L35.014 87.548L39.707 88.561L37.312 84.9391L36.611 82.726L37.312 76.182L33.12 76.38L31.22 74.566L27.226 74.67L25.325 74.974L25.523 79.399L24.521 79.805L23.318 82.0201L26.413 85.64L26.717 90.971Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="cm"
+      d="M66.264 88.837L69.047 91.398L68.848 95.357L84.114 95.003L85.359 93.604L80.984 88.893L80.336 87.19L83.12 81.978L81.227 78.52L79.636 77.665V75.91L81.477 74.708L81.581 69.245L80.121 69.081L80.097 71.951L73.683 83.923L69.758 84.122L67.07 85.972L66.264 88.837Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="dj"
+      d="M147.224 69.18L146.731 72.083L150.155 72.031L150.207 67.76L148.954 66.99L147.224 69.18Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="dz"
+      d="M62.858 5.173L59.332 3.987L44.655 6.745L41.457 9.17401L43.41 19.262L37.575 19.495L34.066 25.141L25.707 27.146L25.732 31.251L53.264 52.299L57.956 52.697L73.61 40.466L72.045 38.495L69.107 38.097L67.343 35.142V22.909L66.166 21.725L66.365 18.57L63.235 15.415L62.846 12.061L64.212 11.075L63.622 7.522L62.858 5.173Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="eg"
+      d="M104.393 18.631L106.701 18.693L111.196 19.937L113.331 19.998L115.977 17.785H117.211L119.46 19.03H122.305L122.815 18.995L124.613 24.165L125.123 25.833L125.6 28.331L124.75 28.953L123.289 28.219L121.603 22.721L120.082 22.61L119.971 24.477L120.983 27.709L129.083 37.736L129.256 42.041L126.897 44.764L104.734 44.513L104.393 18.631Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="er"
+      d="M134.457 63.268L134.241 58.175L137.664 54.183L138.59 54.892L140.276 60.529L148.367 66.552L146.897 68.36L140.975 63.269L134.457 63.268Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="et"
+      d="M128.215 78.015L134.507 64.01L140.757 64.045L146.298 68.859L145.908 72.827H150.204L150.644 75.213L157.594 79.37L161.88 79.587L153.73 88.343L142.536 91.792H139.763L134.819 87.573L132.866 86.753L129.08 81.177L126.581 81.212L126.287 78.653L128.215 78.015Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ga"
+      d="M73.671 96.055L73.567 98.206L68.692 98.102L65.71 103.868L72.722 111.535L74.458 110.082L74.406 108.579L73.214 108.025V106.968L75.902 105.267L78.289 107.074L80.927 107.126L80.873 98.059L76.697 97.863L76.645 95.96L73.671 96.055Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="gh"
+      d="M37.324 82.588L38.292 84.8611L40.816 88.82L42.216 88.768L46.035 86.597L45.767 74.243L42.81 73.379L38.669 73.491L37.324 82.588Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="gm"
+      d="M4.952 66.415L4.841 67.374L10.821 67.288L11.125 66.397L10.995 65.499L9.27399 66.199L4.952 66.415Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="gn"
+      d="M8.00299 74.713L10.632 78.759L14.055 75.785L17.566 75.63L20.488 79.511L22.968 81.146L23.901 79.33L24.731 78.864L24.67 74.871L23.02 70.134L17.955 70.696L11.688 70.195L11.654 71.801L8.00299 74.713Z"
+      fill="black"
+    />
+    <g id="gq">
+      <path
+        on:click={click}
+        id="Vector_3"
+        d="M69.004 96.106L68.95 97.308L72.874 97.506L72.822 96.15L69.004 96.106Z"
+        fill="black"
+      />
+    </g>
+    <path
+      on:click={click}
+      id="gw"
+      d="M6.42902 71.765L7.64001 74.16L11.036 71.238L11.071 70.339L7.06799 69.76L6.42902 71.765Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ke"
+      d="M129.375 90.774L131.675 95.258L128.916 101.041L128.555 102.795L142.325 111.311L146.596 104.603L144.435 102.849L144.392 94.014L147.097 91.058L142.784 92.493L139.525 92.537L134.425 88.232L132.817 87.54L129.837 87.816L129.311 88.699L129.375 90.774Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="km"
+      d="M152.592 129.422L152.988 130.743L154.699 131.012L155.355 129.292L152.592 129.422Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="lr"
+      d="M16.431 84.436L25.922 90.781L25.695 85.976L22.826 82.596L20.025 80.115L16.431 84.436Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ls"
+      d="M109.129 176.238L111.766 174.206L113.011 174.259L114.514 176.134L114.359 178.011L111.826 178.945V179.673L109.034 179.517L108.36 177.486L109.129 176.238Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ly"
+      d="M68.191 22.927L69.541 22.702L69.938 19.59H70.612L73.37 15.062L80.174 17.041L82.03 19.928L88.72 22.99L92.202 21.52L91.864 20.049L90.343 18.58L90.516 17.559L92.989 15.466H97.883L99.739 17.955L103.673 18.525L104.184 50.414L101.262 50.302L83.611 41.121L81.701 42.202L74.448 40.388L72.477 37.785L69.607 37.388L68.149 34.785L68.191 22.927Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ma"
+      d="M40.738 9.31201H30.756L28.802 13.651L24.298 15.821L20.579 25.883L13.336 30.224L3.16199 46.985L13.145 46.786L13.534 41.859H16.075V35.151H24.885L25.081 26.472L33.501 24.5L37.027 18.777L42.507 18.579L40.738 9.31201Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="mg"
+      d="M165.221 130.883L163.379 135.257L160.225 140.823L154.702 141.219L152.333 144.002L152.73 152.49L149.307 156.467L149.703 163.228L152.6 166.539L156.023 166.143L159.446 163.619L158.659 159.642L166.553 145.985L164.971 144.265L166.553 140.953L168.264 141.479L168.79 140.157L167.208 133.397L166.284 130.613L165.221 130.883Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ml"
+      d="M15.817 64.254L18.479 62.431L33.278 62.344L29.855 38.538L33.762 38.426L52.665 52.854L55.206 53.216L54.247 61.237L42.361 62.317L33.19 69.164L31.521 73.85L25.151 74.119L23.526 69.442L18.642 69.788L18.831 68.258L15.817 64.254Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="mr"
+      d="M3.23099 47.675L5.116 50.138L4.72699 60.788L7.46701 58.816L9.41901 58.419L12.16 59.404L15.288 63.744L18.227 61.773L32.515 61.574L28.989 37.708L32.775 37.69L25.721 32.288L25.73 35.798L16.8 35.808L16.757 42.506L14.19 42.497L13.862 47.441L3.23099 47.675Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="mw"
+      d="M126.201 136.483L128.89 139.293L128.837 142.89L129.357 144.404L132.927 140.549L132.513 135.65L130.601 134.19L128.9 125.587L125.951 125.483L127.291 131.679L126.201 136.483Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="mz"
+      d="M121.024 165.768L123.35 167.696L128.829 164.361L129.71 159.408V151.23L138.501 144.039L140.007 144.092L145.329 138.985L144.501 128.456L130.691 130.199L131.21 133.537L133.23 135.294L133.8 141.025L129.044 145.667L127.903 143.064L128.11 139.624L125.37 136.651L118.645 139.781L124.903 142.963L125.112 152.237L120.971 158.383L121.024 165.768Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="na"
+      d="M82.454 173.272L85.351 173.48L87.053 175.2L91.09 175.252L92.074 163.79V156.287L94.659 155.767L95.645 147.9L102.214 147.694L104.537 145.767L100.604 145.611L95.279 146.337L89.54 144.255H73.41L73.825 148.835L79.201 156.753L78.267 160.815L78.32 162.951L82.454 173.272Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ne"
+      d="M51.629 69.579L53.833 69.526L55.821 66.545L59.157 65.948L62.71 68.118L70.29 68.334L76.151 65.948L78.355 64.054L78.519 61.565L82.607 57.442L83.687 48.338L80.999 42.702L74.119 41.025L58.196 53.438L55.94 53.221L54.971 61.838L46.847 62.651L51.629 69.579Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ng"
+      d="M52.217 84.594L55.606 84.758L59.694 89.315L61.681 89.859L63.239 89.098L65.606 88.77L66.411 85.467L69.636 83.35L73.128 83.187L79.524 71.421L79.42 68.768L76.465 66.495L70.552 69.098L62.643 68.987L58.873 66.601L56.185 67.197L54.785 69.635L54.681 76.515L52.425 79.713L52.217 84.594Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="rw"
+      d="M118.129 102.34L120.558 104.578L120.454 106.974L116.685 107.051V104.405L118.129 102.34Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="sd"
+      d="M104.377 74.444L101.827 72.94L99.502 68.35L99.632 64.079L102.856 61.307L103.011 51.079L105.138 51.141L104.896 45.461L127.198 45.659L130.387 42.444L137.268 53.448L133.498 57.89V64.675L128.899 74.566L127.859 76.866L124.15 71.55L121.442 74.991L118.383 75.825L108.442 74.825L104.109 76.366L104.377 74.444Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="sl"
+      d="M11.037 79.199L15.921 83.919L19.404 79.692L17.225 76.277L14.225 76.58L11.037 79.199Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="sn"
+      d="M10.657 68.18L4.86499 68.039L5.93701 70.642L6.53299 69.035L13.804 69.796L14.61 69.768L18.015 69.888L18.136 68.384L15.025 64.651L11.558 59.958L9.40601 59.06L7.745 59.484L4.34 61.956L3.564 63.34L3.32199 64.723L4.57501 65.622L8.76001 65.561L11.448 64.833L11.751 66.155L11.51 67.901L10.657 68.18Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="so"
+      d="M164.936 71.35L168.713 69.898L170.053 70.702L169.906 74.056L166.424 83.979L147.57 104.169L145.383 102.666L145.236 94.145L148.071 90.885L154.089 89.028L162.913 79.71L165.223 77.652L165.87 74.644L164.936 71.35Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ss"
+      d="M127.569 77.428L125.529 78.326L126.176 81.8789H128.718L132.166 86.883L129.399 87.237L128.69 88.525L128.621 90.382L120.323 90.236L119.475 88.948L113.675 88.62L103.026 77.658L104.089 77.018L108.606 75.654L118.503 76.408L121.869 75.654L124.104 72.658L127.569 77.428Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="sz"
+      d="M120.764 166.392L118.595 166.753L117.66 169.305L119.319 170.818H121.334L123.036 168.372L120.764 166.392Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="td"
+      d="M79.204 64.392L79.316 61.84L83.414 57.857L84.513 48.072L81.782 42.851L83.693 41.872L102.191 51.511L102.078 60.967L98.819 63.742V68.617L100.955 72.749H97.185L90.945 78.922L90.78 80.789L86.175 80.728L86.114 81.574L83.486 81.229L81.688 77.832L80.337 77.166L80.511 76.129L82.204 74.832V68.766L79.861 68.403L77.035 66.301L79.204 64.392Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="tg"
+      d="M46.728 86.219L49.044 84.863L48.991 75.917L47.487 73.479L46.52 74.291L46.728 86.219Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="tn"
+      d="M63.749 5.03296L68.529 3.10596L70.101 4.12598L70.162 5.36996L69.428 6.32898L69.539 8.03195L70.274 8.42798V11.489L69.427 12.907L69.538 13.815L72.745 14.947L70.161 18.967L69.149 18.906L68.976 22.138L67.852 22.312L66.893 21.463L67.118 18.179L63.972 15.118L63.575 12.456L65.096 11.264L63.749 5.03296Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="tz"
+      d="M130.453 129.426L144.25 127.736L140.855 121.167L140.673 114.875L141.771 111.866L127.404 102.843L122.902 103.586L121.338 104.744L121.199 107.381L120.187 111.037L119.132 112.29L117.618 112.431L120.427 121.849L125.243 124.687L129.438 124.787L130.453 129.426Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="ug"
+      d="M118.544 101.639L121.163 104.093L122.806 103.048L127.248 102.32L128.01 102.399L128.294 100.711L130.802 95.439L128.693 91.047L121.856 91.091L121.813 92.899L122.73 93.781L122.591 95.588L118.544 101.639Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="za"
+      d="M114.964 157.429L108.135 163.74L106.51 167.638L101.099 166.964L96.596 170.966L93.605 170.672L93.846 165.141L92.784 164.769L92.041 176.083L86.733 176.031L85.133 174.145L82.789 174.121L84.926 180.25L88.738 183.854L86.015 187.026L87.779 191.003L91.859 192.561L95.109 189.794L104.42 189.847L105.087 189.017L109.219 188.289L123.197 174.372L123.144 169.99L121.649 171.927H119.411L116.688 169.645L118.071 166.205L120.449 165.723L120.232 158.652L114.964 157.429ZM111.688 173.42L112.994 173.368L115.112 175.667L115.051 178.329L112.57 179.582L112.415 180.465L108.63 180.508L107.444 177.655L108.525 175.563L111.688 173.42Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="zm"
+      d="M98.013 141.065L100.752 144.867L104.996 145.128L106.5 145.957L110.943 146.01L114.772 140.643L125.474 135.854L126.408 131.635L125.164 125.592L119.58 122.411L115.853 122.671L113.996 126.785L114.049 128.661L118.44 130.797L118.7 135.439L114.925 135.647L113.99 134.083L103.495 129.604L103.184 133.044L98.222 133.199L98.013 141.065Z"
+      fill="black"
+    />
+    <path
+      on:click={click}
+      id="zw"
+      d="M106.753 147.635L114.508 156.392L120.454 157.905L124.438 151.657L124.126 143.376L117.661 140.039L115.23 141.137L111.61 146.661L106.596 146.608L106.753 147.635Z"
+      fill="black"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1_2">
+      <rect width="174" height="197" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+
+<style>
+  svg {
+    fill: none;
+    background: none;
+  }
+  path {
+    fill: #b2b2b2;
+  }
+  path:hover {
+    fill: var(--aqua);
+  }
+  svg {
+    width: 100%;
+  }
+</style> -->
+
+

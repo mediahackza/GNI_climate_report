@@ -1,0 +1,77 @@
+<script>
+  export let tag
+  export let refresh;
+
+
+</script>
+
+<div class="container tag {tag.active ? '' : 'inactive'} {tag.type}">
+  <!-- <div class="type">
+        {tag.type.toUpperCase()}
+    </div> -->
+
+  <div class="tag">
+    {tag.name}
+  </div>
+
+  <svg
+    on:click={() => {
+      tag.set_active(false)
+      tag = tag;
+      refresh();
+    }}
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class=" delete-icon lucide lucide-x-circle"
+    ><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path
+      d="m9 9 6 6"
+    /></svg
+  >
+</div>
+
+<style>
+  
+  .inactive {
+    display: none;
+  }
+
+  .container {
+    position: relative;
+    width: fit-content;
+    /* padding: 10px  20px; */
+    /* padding: 2px 5px; */
+    /* border-radius: 5px; */
+    /* margin: 5px; */
+  }
+
+  .container:hover .delete-icon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .delete-icon {
+    display: none;
+    color: black;
+  }
+
+  .type {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-align: left;
+  }
+
+  /* .data {
+    font-size: 1.2rem;
+    text-align: center;
+  } */
+</style>
