@@ -11,9 +11,9 @@
   import { Tag_con } from '$helpers/tags.js'
   export let data
 
-  console.log(data);
-  
-  let map_type = 'country';
+  console.log(data)
+
+  let map_type = 'country'
 
   let subjectTags = data.tags.filter((t) => t.type == 'tag')
 
@@ -37,7 +37,7 @@
           break
         case 'na':
           sb_region = 'North Africa'
-          break;
+          break
       }
 
       if (region_index.hasOwnProperty(sb_region)) {
@@ -78,18 +78,17 @@
   }
 
   const refresh = () => {
-    tag_list = tag_list;
-    console.log("Refreshed")
+    tag_list = tag_list
+    console.log('Refreshed')
   }
-
 </script>
 
 <div class="dashboard">
   <div class="panel panel-left">
     <div class="panel-inner">
-      <div class="panel-title">African Data Reporter</div>
+      <div class="panel-title">African Climate Data Reporter</div>
       The Africa Climate Data Explorer records climate-related research and reports.
-      The database is searchable by country, topic, and type of data.
+      The database is searchable by region, country and topic.
 
       <div class="panel-subtitle">Select a Topic</div>
       <div class="panel-tags">
@@ -109,22 +108,26 @@
       </div>
       <div class="panel-subtitle">
         Select a <select bind:value={map_type}>
-          <option value='country'>Country</option>
-          <option value='region' >Region</option>
-          <option value='subregion'>Sub-region</option>
+          <option value="country">Country</option>
+          <option value="region">Region</option>
+          <option value="subregion">Sub-region</option>
         </select>
         <span class="panel-subtitle-sub">(optional)</span>
-        <Map countries={data.countries} bind:tags={tag_list} bind:type={map_type}/>
+        <Map
+          countries={data.countries}
+          bind:tags={tag_list}
+          bind:type={map_type}
+        />
       </div>
     </div>
   </div>
   <div class="panel panel-right">
-    <SearchBar bind:search_items={tag_list} {refresh}/>
+    <SearchBar bind:search_items={tag_list} {refresh} />
 
     <TagContainer bind:tag_list />
 
     {#if tag_count != 0 && country_count != 0}
-      <DataTable bind:active_tags={tag_list} countries={data.countries}  />
+      <DataTable bind:active_tags={tag_list} countries={data.countries} />
     {/if}
 
     {#if tag_count != 0 || country_count != 0}

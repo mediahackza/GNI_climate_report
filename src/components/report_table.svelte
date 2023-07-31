@@ -1,7 +1,7 @@
 <script>
   export let tag_list
   export let table_data
-  export let warning = true;
+  export let warning = true
 
   let filters = {
     country: new Set(),
@@ -27,7 +27,6 @@
       table_data = table_data
     }
   })
-
 
   const out_list = (set) => {
     let string = ''
@@ -77,14 +76,17 @@
 
 <div class="container">
   {#if data.length == 0 && warning}
-    <div class="description-box">no reports {#if filters.tag.size > 0} on {out_list(filters.tag)}{/if} {#if filters.country.size > 0} in {out_list(filters.country)}{/if} to show</div>
+    <div class="description-box">
+      no reports {#if filters.tag.size > 0} on {out_list(filters.tag)}{/if}
+      {#if filters.country.size > 0} in {out_list(filters.country)}{/if} to show
+    </div>
   {/if}
   {#if data.length > 0}
     <div class="heading">
-      Reports
+      <!-- Reports
       {#if filters.tag.size > 0} on {out_list(filters.tag)}{/if}
 
-      {#if filters.country.size > 0} in {out_list(filters.country)}{/if}
+      {#if filters.country.size > 0} in {out_list(filters.country)}{/if} -->
 
       <!-- {#if} -->
     </div>
@@ -112,7 +114,6 @@
                     class="tag"
                     class:has_tag={filters.tag.has(tag)}
                     class:no_tag={!filters.tag.has(tag)}
-                    
                   >
                     {tag}
                   </span>
@@ -151,13 +152,12 @@
   }
 
   .description-box {
-        margin: auto;
-        width: 80%;
-        padding: 10px;
-        background-color: #F7F7F7;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
+    margin: auto;
+    width: 80%;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
 </style>
